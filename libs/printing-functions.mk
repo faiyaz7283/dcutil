@@ -147,12 +147,12 @@ define help
 	printf "\
 		DCUTIL(1)\t\tGeneral Commands Manual\n\n\
 		$${b}NAME$${n}\n \
-		\tdcutil -- A docker-compose utility for php projects.\n\n\
+		\tdcutil -- A docker-compose utility for devs.\n\n\
 		$${b}SYNOPSIS$${n}\n\
 		\tdcutil [ options ] [ parameters ] <target>\n\n\
 		$${b}DESCRIPTION$${n}\n\
-		\tA utility program for php projects to run with docker-compose. The main objective of using DCUTIL - is to make \n\
-		\trunning of php projects on docker cnts a cinch. It simply helps automate helpful functions, which in \n\
+		\tA utility program for developers to run with docker-compose. The main objective of using DCUTIL - is to make \n\
+		\trunning of dev projects on docker containers a cinch. It simply helps automate helpful functions, which in \n\
 		\totherwise most would do manually.\n\n\
 		$${b}OPTIONS$${n}\n\
 		\tOption must be the first argument. Only one option should be passed at a time. If more than one option is \n\
