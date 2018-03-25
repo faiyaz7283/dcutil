@@ -1,0 +1,23 @@
+sudo: true
+
+language: bash
+
+before_install:
+  - dcutil_program_installation_dir=/tmp/local/bin
+  - mkdir -p $dcutil_program_installation_dir
+  - export PATH=$PATH:$dcutil_program_installation_dir
+  - dcutil_project_installation_dir="$(dirname $(pwd))"
+  - ./install.sh $dcutil_program_installation_dir $dcutil_project_installation_dir
+  - source ~/.bashrc && source ~/.bash_profile
+
+script:
+  - ./libs/bats/bin/bats test
+
+branches:
+  only:
+    - /.*/
+
+notifications:
+  email:
+    on_success: never
+    

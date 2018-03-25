@@ -1,0 +1,63 @@
+version: '3.4'
+
+networks:
+  frontend:
+  backend:
+
+services:
+  workstation:
+      image: ${DEMO_TODO_WORKSTATION_IMAGE}
+      extra_hosts:
+        - "${HOST_NAME}:${HOST_IP}"
+      volumes:
+        - "${DEMO_TODO_PHP_INI}"
+        - "${DEMO_TODO_PHP_CONF}"
+        - "${DEMO_TODO_PHP_WWW_CONF}"
+        - "${DEMO_TODO_WORKING_DIR}:${CONTAINER_WORKING_DIR}"
+      networks:
+        - frontend
+        - backend
+
+  php:
+    image: ${DEMO_TODO_PHP_IMAGE}
+    extra_hosts:
+      - "${HOST_NAME}:${HOST_IP}"
+    volumes:
+      - "${DEMO_TODO_PHP_INI}"
+      - "${DEMO_TODO_PHP_CONF}"
+      - "${DEMO_TODO_PHP_WWW_CONF}"
+      - "${DEMO_TODO_WORKING_DIR}:${CONTAINER_WORKING_DIR}"
+    networks:
+      - backend
+
+  nginx:
+    image: ${DEMO_TODO_NGINX_IMAGE}
+    ports:
+      - "${DEMO_TODO_NGINX_HTTP_PORT}"
+      - "${DEMO_TODO_NGINX_HTTPS_PORT}"
+    extra_hosts:
+      - "${HOST_NAME}:${HOST_IP}"
+    volumes:
+      - "${DEMO_TODO_NGINX_SITES}"
+      - "${DEMO_TODO_NGINX_LOGS}"
+      - "${DEMO_TODO_NGINX_CONF}"
+      - "${DEMO_TODO_WORKING_DIR}:${CONTAINER_WORKING_DIR}"
+    networks:
+      - frontend
+      - backend
+
+  mysql:
+    image: ${DEMO_TODO_MYSQL_IMAGE}
+    extra_hosts:
+      - "${HOST_NAME}:${HOST_IP}"
+    environment:
+      - MYSQL_DATABASE=${DEMO_TODO_MYSQL_DATABASE}
+      - MYSQL_USER=${DEMO_TODO_MYSQL_USER}
+      - MYSQL_PASSWORD=${DEMO_TODO_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DEMO_TODO_MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${DEMO_TODO_MYSQL_PORT}"
+    volumes:
+      - "${DEMO_TODO_MYSQL_DATA}"
+    networks:
+      - backend
