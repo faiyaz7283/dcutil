@@ -162,8 +162,7 @@ define help
 		\t-h, --help\n\
 		\t    --man\tDisplay this help manual.\n\n\
 		$${b}PARAMETERS$${n}\n\
-		\tThere is only one required parameter 'p' (project). DCUTIL needs the name of the project to work. Optional \n\
-		\tparameters can be set to bypass certain functionalities, or override .env variables etc.\n\n\
+		\tThere is only one required parameter 'p' (project). DCUTIL needs the name of the project to work.\n\n\
 		\t$${b}Required:$${n}\n\
 		\tp\t\tThe name of the project.\n\
 		\t\t\tProject name can also be set with just the name of the project by itself without the p=project convetion. \n\

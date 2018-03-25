@@ -2,8 +2,9 @@
 [![Build Status](https://travis-ci.org/faiyaz7283/dcutil.svg?branch=master)](https://travis-ci.org/faiyaz7283/dcutil)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1686/badge)](https://bestpractices.coreinfrastructure.org/projects/1686)
 
-A utility program for php projects to run with docker-compose. The main objective of using DCUTIL - is to make running of 
-php projects on docker containers a cinch. It simply helps automate helpful functions, which in otherwise most would do manually. 
+A utility program for developers to run with docker-compose. The main objective of using DCUTIL - is to make 
+running of dev projects on docker containers a cinch. It simply helps automate helpful functions, which in otherwise 
+most would do manually. 
 
 - [Installing DCUTIL](#installing-dcutil)
     - [Requirements](#requirements)
