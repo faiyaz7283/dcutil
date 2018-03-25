@@ -32,11 +32,9 @@ print_logo() {
     echo ' \ \____-  \ \_____\  \ \_____\    \ \_\  \ \_\  \ \_____\'
     echo '  \/____/   \/_____/   \/_____/     \/_/   \/_/   \/_____/'
     tput setaf 3
-    echo '                   A docker-compose utility for devs.'
-    print_cl 7 "Copyright (c) $(date +%Y) Faiyaz Haider under the MIT License.\n\n"
-
+    echo '                         A docker-compose utility for devs.'
+    echo "    Copyright (c) $(date +%Y) Faiyaz Haider under the MIT License."
 }
-
 
 # Print messages in color
 print_cl() {
@@ -55,10 +53,21 @@ if_cmd_success() {
     fi
 }
 
-# DCUTIL Script
+# DCUTIL command
 print_dcutil_call() {
     cat << EOS
 #!/usr/bin/env bash
+
+# Update self
+self_update() {
+    ./install.sh ${program_dir} \$(dirname \${dcutil_root})
+    if [ -f "/tmp/dcutil" ]; then
+        echo "Updating the script."
+        mv /tmp/dcutil ${program_dir}/dcutil
+        chmod 755 ${program_dir}/dcutil
+        return 0
+    fi
+}
 
 generic_info() {
     g="man"
@@ -94,14 +103,7 @@ if [ -d "\$dcutil_root" ]; then
     (
         cd \${dcutil_root}
         if [ "\$1" == "-u" -o "\$1" == "--update" ]; then
-            git fetch -q --all --prune && git pull -q
-            ./install.sh ${program_dir} \$(dirname \${dcutil_root})
-            [ -f "/tmp/dcutil" ] && {
-                echo "Updating the dcutil script in ${program_dir} directory."
-                cp /tmp/dcutil ${program_dir}/dcutil
-                rm -f /tmp/dcutil
-                return || exit
-            }
+            self_update
         elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
 			tput setaf 1; printf "Are you sure you want to remove DCUTIL from this machine ?\n"; tput sgr0
 			select choice in "Yes" "No"; do
@@ -209,12 +211,12 @@ EOS
 }
 
 # Business...
-
 if [ "$repo" ]; then
     # Add DCUTIL project if doesn't exist.
     if cd "${dcutil_install_dir}/dcutil" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${repo} 2>/dev/null 1>&2; then
-        # All good
-        print_cl 7 "Repo: "; print_cl 2 "up to date.\n"
+        if git fetch -q --all --prune && git pull -q; then
+            print_cl 7 "Repo: "; print_cl 2 "up to date.\n"
+        fi
     else
         print_cl 3 "Cloning DCUTIL from git repo...\n"
         if_cmd_success "git clone ${repo} ${dcutil_install_dir}/dcutil" 'DCUTIL cloned.'
@@ -224,13 +226,13 @@ fi
 
 if [ ! -f "${program_dir}/dcutil" ]; then
     # Set the dcutil command
-    print_cl 3 "Adding the dcutil script in your ${program_dir} directory.\n"
+    print_cl 3 "Adding the 'dcutil' command in your ${program_dir} directory.\n"
     print_dcutil_call "${dcutil_install_dir}/dcutil" > "${program_dir}/dcutil"
     chmod 755 "${program_dir}/dcutil"
-    print_cl 2 "Done. Make sure ${program_dir} is in your PATH and refresh your current shell to recognize DCUTIL.\n\n"
+    print_cl 2 "Done. Make sure ${program_dir} is in your PATH.\n\n"
     print_logo
-elif [ -f "${program_dir}/dcutil" ] && [ "$(print_dcutil_call ${dcutil_install_dir}/dcutil)" != "$(cat ${program_dir}/dcutil)" ]; then
-    print_cl 7 "Script: "; print_cl 1 "out of date.\n"
+elif [ "$(print_dcutil_call ${dcutil_install_dir}/dcutil)" != "$(cat ${program_dir}/dcutil)" ]; then
+    print_cl 7 "Script: "; print_cl 1 "outdated.\n"
     print_dcutil_call "${dcutil_install_dir}/dcutil" > "/tmp/dcutil"
 else
     print_cl 7 "Script: "; print_cl 2 "up to date.\n"
