@@ -10,8 +10,8 @@ most would do manually.
     - [Requirements](#requirements)
     - [Option 1: Execute the installer script remotely](#option-1-execute-the-installer-script-remotely)
     - [Option 2: Clone the project and run the installer](#option-2-clone-the-project-and-run-the-installer)
-- [Tutorial](#tutorial)
-    - [Setting the environment file](#setting-the-environment-file)
+- [An example usage - basic lemp stack](#an-example-usage-basic-lemp-stack)
+    - [Setting up a .env file](#setting-up-a-env-file)
     - [Setting the docker-compose file](#setting-the-docker-compose-file)
     - [Setting up the project](#setting-up-the-project)
     - [Setting up docker](#setting-up-docker)
@@ -98,109 +98,35 @@ Now you can issue the **dcutil** command from anywhere and run the program.
 dcutil
 ```  
 
-### Tutorial ###
+### An example usage - basic lemp stack ###
 
-Let's get started with a simple php project setup. We will be using a very basic 
-[TODO web application](https://github.com/faiyaz7283/demo_todo), built with [Laravel](https://laravel.com). This guide 
-assumes, this is a fresh installation of DCUTIL, and you do not have any project setup under DCUTIL and the demo_todo 
-project does not yet exist on your machine. Basically a fresh start. Once you complete this guide - you will be able to 
-use DCUTIL with your own project(s). 
+Let's see how we can use DCUTIL to aid us with a basic LEMP stack php project. We will be using a very basic 
+[TODO web application](https://github.com/faiyaz7283/demo_todo), built with a php framework called 
+[Laravel](https://laravel.com). This guide is meant to highlight the core concept of DCUTIL. Once you complete the 
+guide, you should be able to use DCUTIL with your own dev project(s). 
 
-DCUTIL requires a .env file and a project name. Since, this is a fresh install, we will use the DCUTIL built in set_env 
-command to build our initial .env file. 
+DCUTIL requires a .env file with few required variables. One of the most important variable that needs to be set is the 
+PROJECTS variable. Basically, you can add as many projects as  using a colon to separate them.
 
-#### Setting the environment file ####
+#### Setting up a .env file ####
+
+DCUTIL comes with a .env.example file. We can use this file as a starting point. Its all setup for our demo_todo 
+project. Lets move into the dcutil folder and make a copy of .env.example file to .env.
 
 ```bash
-dcutil demo_todo set_env
+cd ~/dcutil && cp .env.example .env
 ```
 
-You will be presented with 2 options, 'Full' or 'Basic'. 
-Option 1 'Full' will guide you through setting up a .env file with a full LEMP setup along with all DCUTIL required data. 
-Option 2 'Basic' will guide you through only the required fields needed for DCUTIL. 
-For most cases, select the BASIC option, then manually set your project related data. 
-For the purpose of this demo guide, we will select option 1 'Full' by typing 1, and pressing enter.
-
-```
-running... set_env
-Would you like to setup a full pre-built .env file or a basic .env file with few DCUTIL required vars ?
-1) Full
-2) Basic
-#?
-```
-
-For the next step, DCUTIL  will ask for a directory/library from where we will guide our docker setup. This is basically  
-your custom directory where you store your docker files, docker-compose yml files, logs, db data, and other necessary 
-files and structure to run your php project on docker machine. For most cases, you should provide your own custom 
-directory. To get you started, DCUTIL comes with a basic library. You can use this library as a starting point and 
-customize to your need. Please select the option 2 'No' to use the DCUTIL provided library.
-
-```
- • File .env is ready.
- • Let's setup .env file.
-Do you have an existing directory to control dcutil (A directory/library for docker related files.) ?
-1) Yes
-2) No
-#?
-```
-
-Please type a custom library name, or press enter to use the default name 'dcutil-library'.
-
-```
-A library of configurations and other necessary files are needed to control project specific docker containers.
-Please type a name for your library: (Default 'dcutil-library')
-```
-
-Now before we create and structure the library, we need to know your location choice. By default, DCUTIL will target your
-home directory. If you are fine with the default, press enter, or type your own location.
-
-```
-Please type the location where you would like to place your library folder: (Default '/Users/home/diretory')
-```
-
-A sample dcutil-library will be copied over to the path selected from previous step. 
-```
-• Copying library to /Users/home/diretory/dcutil-library
-```
-
-Next, please type in a name for your host machine. This name will be used to target the host machine from within docker 
-containers. Press enter to use a default name 'dockerhost'.
-
-```
-Enter a name for your host machine: (Default 'dockerhost')
-```
-
-Type in the location where you would be cloning the demo_todo project. For example ~/code, ~/local or whatever location 
-you might already have your other existing php projects. DCUTIL makes no suggestion for this particular step, so if you 
-are not sure, you can just press enter and go to the next step, and manually set this after the set_env command 
-completes. Keep in mind though, this is a required field for DCUTIL to work. Without declaring a project's working 
-directory location, DCUTIL is not functional. 
-
-```
-Please enter your project's working directory:
-```
-
-For the next set of steps and the purpose of the demo_todo project, please use the default answers provided by DCUTIL, 
-by simply pressing enter, and finish setting up the .env file. 
-
-```
- ...
- • Setting new .env completed.
-√ set_env done
-```
-
-Once the setup process is complete, you will find a .env file inside the DCUTIL git project folder. Open it, and verify  
-all information provided is correct. If you did not provide a project's working directory, please make sure to manually 
-set DEMO_TODO_WORKING_DIR var with the path where you will be storing your demo_todo project. Ideally, it should be the 
-same location where you would have most of your other php projects.
-
-#### Setting the environment file ####
-
-TBD
+Once the file finished copying, please open the file in your editor. Let's add a value for the DEMO_TODO_WORKING_DIR. 
+This value should be the full directory path where the demo_todo file will be downloaded. For most cases, the location 
+of all or multiple projects might be one single location. If that is the case, then its advisable to use the 
+HOST_WORKING_DIR variable instead. For example ```HOST_WORKING_DIR==/users/homepage/code```. Let' also add a 
+value for the HOST_IP variable. This is the private IP of your host machine. For mac use ```ipconfig getifaddr en0```. 
+For linux use ```hostname -I```. For windows use ```ipconfig /all``` and copy the IPv4 address.
 
 #### Setting up the project ####
 
-Now that we have a valid .env file setup. Let's build and setup the php project. DCUTIL needs to know the location where 
+Now that we have a valid .env file setup. Let's seutp the demo_todo project. DCUTIL needs to know the location where 
 the project will reside. If you haven't already set the project's working directory, you will have to do so before the 
 next step. The project working directory variable naming convention is simple, add the projects name followed by 
 working_dir, all in caps and snake_case. So for our demo_todo project, the var name will be DEMO_TODO_WORKING_DIR.

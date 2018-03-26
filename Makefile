@@ -116,52 +116,36 @@ isset_valid_cf : check_not_root isset_p_param isset_env
 	fi
 
 #--------------------------------------------------------------------------------------------[ Setup targets ]----------
-set_code_project : check_not_root isset_p_param
+set_project : check_not_root isset_p_param
 	@$(call print_running_target); \
 	if [ "$$repo" ]; then \
 		$(MAKE) set_git_code_project; \
 	else \
-		$(call print_color, 3, "Would you like to get the project from a git repo ?"); \
-		select choice in "Yes" "No"; do \
-			case $$choice in \
-				Yes ) $(MAKE) set_git_code_project; \
-					  break;; \
-				No )  $(call print_dual_color, 1, "You need a project to continue.\n", 3, "Goodbye"); \
-					  if [ "$$dir_empty" == true -o "$$project_exist" == false ]; then \
-					      exit 1; \
-					  fi; \
-					  break;; \
-				* ) echo "Please enter 1 for Yes or 2 for No.";; \
-			esac; \
-		done; \
-	fi; \
-	$(call print_completed_target)
-
-set_git_code_project : check_not_root isset_p_param
-	@$(call print_running_target); \
-	$(call get_dcutil_project_working_dir); \
-	$(call sanitize_dir, wd, $$wd); \
-	cd $$wd; \
-	if [ -z "$$repo" ]; then \
-		$(call print_color, 3, "Enter your git repository url: "); \
-		read repo; \
-	fi; \
-	$(call print_target_info, "Cloning project from $$repo."); \
-	if git clone $$repo ./$(p) > /dev/null 2>&1; then \
-		$(call print_target_success, "Project $(p) cloned."); \
-	else \
-		$(call print_target_error, "Failed to clone $(p) project from the provided repository."); \
+		if [ "$$dir_empty" == true -o "$$project_exist" == false ]; then \
+			$(call get_dcutil_project_working_dir); \
+			$(call sanitize_dir, wd, $$wd); \
+			cd $$wd; \
+			if [ -z "$$repo" ]; then \
+				$(call print_color, 3, "Enter your git repository url: "); \
+				read repo; \
+			fi; \
+			$(call print_target_info, "Cloning project from $$repo."); \
+			if git clone $$repo ./$(p) > /dev/null 2>&1; then \
+				$(call print_target_success, "Project $(p) cloned."); \
+			else \
+				$(call print_target_error, "Failed to clone $(p) project from the provided repository."); \
+			fi; \
+		fi; \
 	fi; \
 	$(call print_completed_target)
 
 #--------------------------------------------------------------------------------------------[ Build targets ]----------
-full_build : check_not_root isset_p_param isset_env isset_valid_cf
+build : check_not_root isset_p_param isset_env isset_valid_cf
 	@$(call print_running_target); \
 	$(call get_dcutil_project_working_dir); \
 	$(call get_dcutil_project_docker_compose_files); \
-	$(MAKE) build_project; \
-	$(MAKE) composer_task; \
-	$(MAKE) build_docker; \
+	$(MAKE) docker_up_detailed; \
+	$(MAKE) pkg_mgmt; \
 	$(MAKE) migration; \
 	$(call print_completed_target)
 
@@ -196,23 +180,8 @@ build_docker : check_not_root isset_p_param isset_env isset_valid_cf
 	$(call print_completed_target)
 
 #------------------------------------------------------------------------------------------[ Project targets ]----------
-composer_task : check_not_root isset_p_param
-	@$(call print_running_target); \
-	$(call get_dcutil_project_working_dir); \
-	$(call sanitize_dir, wd, $$wd); \
-	cd $${wd}/$(p); \
-	if [ -f "composer.json" ]; then \
-		if composer --dry-run install 2>/dev/null; then \
-			$(call print_target_info, "Composer install started."); \
-			composer install; \
-			$(call print_target_success, "Composer install completed."); \
-		else \
-			$(call print_target_error, "Composer failed to run."); \
-		fi; \
-	else \
-		$(call print_target_error, "Missing composer.json file."); \
-	fi; \
-	$(call print_completed_target)
+pkg_mgmt : check_not_root isset_p_param isset_env
+	@$(call override)
 
 migration : check_not_root isset_p_param isset_env
 	@$(call override)

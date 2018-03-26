@@ -165,15 +165,12 @@ define help
 		\tThere is only one required parameter 'p' (project). DCUTIL needs the name of the project to work.\n\n\
 		\t$${b}Required:$${n}\n\
 		\tp\t\tThe name of the project.\n\
-		\t\t\tProject name can also be set with just the name of the project by itself without the p=project convetion. \n\
+		\t\t\tProject name can also be set with just the name of the project by itself without the p=project convention. \n\
 		\t\t\tIf 1 or more projects already set in .env file, then you can also use the key instead of the project name. \n\
 		\t\t\tFor example, let say in your .env file you have PROJECTS=apple:orange:banana. In order to run the apple \n\
 		\t\t\tproject, you can simply use the key 1, and for orange use 2, and for banana use 3.\n\n\
 		\t$${b}Optional$${n}\n\
-		\tdocker\t\tDefaults to false. If set to true, will bypass prompt and force run build docker.\n\
 		\trepo\t\tIf set with git repository url, will bypass prompt and force git repo cloning.\n\
-		\tcomposer\tIf set with a value of 'install', 'update', or 'nothing', will bypass prompt and force run \n\
-		\t\t        composer with given choice.\n\
 		\tsilent\t\tBy default, dcutil is verbose and this value is false. If set to true, dcutil will silent its \n\
 		\t\t        internal verbosity.\n\
 		\tcnt\t\tName of the targeted container.\n\
