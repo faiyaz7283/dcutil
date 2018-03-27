@@ -93,7 +93,6 @@ endef
 # Get this project's working Directory:
 # First look for {PROJECT}_WORKING_DIR and then HOST_WORKING_DIR value in .env file, if neither is set return error
 define get_dcutil_project_working_dir
-	$(call export_env); \
 	$(call to_upper, wd, $(p)_WORKING_DIR); \
 	if [ "$${!wd}" ]; then \
 		$(call sanitize_dir, wd, $${!wd}); \
@@ -109,7 +108,6 @@ endef
 
 # Get this project's docker compose file or return error
 define get_dcutil_project_docker_compose_files
-	$(call export_env); \
 	pld=$$DCUTIL_LIBS_DIR; \
 	dcfs_dir="$${pld}/docker-compose"; \
 	if [ "$$pld" -a -d "$$dcfs_dir" ]; then \
@@ -130,7 +128,6 @@ endef
 
 # Get this project's make file
 define get_custom_project_makefile
-	$(call export_env); \
 	pld=$$DCUTIL_LIBS_DIR; \
 	mkfs_dir="$${pld}/makefiles"; \
 	if [ "$$pld" -a -d "$$mkfs_dir" ]; then \
@@ -150,7 +147,6 @@ endef
 
 # Get all available projects in an array
 define get_dcutil_projects
-	$(call export_env); \
 	projects=(`echo $${PROJECTS//:/ }`)
 endef
 
@@ -180,7 +176,6 @@ endef
 
 # Set DCUTIL project
 define set_dcutil_project
-	$(call export_env); \
 	$(call trim, project, $(1)); \
 	$(call is_valid_project_name, $$project); \
 	if [ -f ".env" ] && [ "$$valid" == true ]; then \

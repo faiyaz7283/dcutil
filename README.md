@@ -10,7 +10,7 @@ most would do manually.
     - [Requirements](#requirements)
     - [Option 1: Execute the installer script remotely](#option-1-execute-the-installer-script-remotely)
     - [Option 2: Clone the project and run the installer](#option-2-clone-the-project-and-run-the-installer)
-- [An example usage - basic lemp stack](#an-example-usage-basic-lemp-stack)
+- [An example usage - basic lemp stack](#an-example-usage---basic-lemp-stack)
     - [Setting up a .env file](#setting-up-a-env-file)
     - [Setting the docker-compose file](#setting-the-docker-compose-file)
     - [Setting up the project](#setting-up-the-project)

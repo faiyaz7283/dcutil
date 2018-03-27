@@ -81,7 +81,6 @@ generic_info() {
 }
 
 project_exists() {
-    [ -f ".env" ] && export \$(cat .env | grep -v ^\\# | xargs)
     projects=(\`echo \${PROJECTS//:/ }\`)
     [[ "\${projects[@]}" =~ "\${1}" ]] && return 0 || return 1
 }
@@ -102,6 +101,7 @@ dcutil_root=${1}
 if [ -d "\$dcutil_root" ]; then
     (
         cd \${dcutil_root}
+        [ -f ".env" ] && export \$(cat .env | grep -v ^\\# | xargs)
         if [ "\$1" == "-u" -o "\$1" == "--update" ]; then
             self_update
         elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
@@ -124,6 +124,11 @@ if [ -d "\$dcutil_root" ]; then
             if [ "\$#" == 0 ]; then
                 generic_info
             else
+                if [ "\$1" == "-q" -o "\$1" == "--quiet" ]; then
+                    quiet=true
+                    shift
+                fi
+
                 pattern='^[0-9]+$'
                 if [[ \$1 =~ \$pattern ]]; then
                     if get_project_by_key \$1 2>/dev/null 1>&2; then
@@ -139,7 +144,12 @@ if [ -d "\$dcutil_root" ]; then
                         shift
                     fi
                 fi
-                make \$project "\$@"
+
+                if [ "\$quiet" == true ]; then
+                    make \$project "\$@" 2>&1 >/dev/null
+                else
+                    make \$project "\$@"
+                fi
             fi
         fi
     )
