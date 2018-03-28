@@ -84,7 +84,7 @@ define override
  	if [ -f "$${pmf}" ] && grep -q "^$${target}\s*:" $${pmf}; then \
  		makefilename="$$(basename $${pmf})"; \
  		$(call print_running_target, '$${makefilename} » $$target'); \
- 		$(MAKE) -f $${pmf} $$target; \
+ 		$(MAKE) -f $${pmf} -I $$(dirname $${pmf}) $$target; \
  		$(call print_completed_target, '$${makefilename} » $$target'); \
  		exit 0; \
  	fi

@@ -1,8 +1,8 @@
 #-------------------------------------------------------------------------------------------------[ Includes ]----------
-include ./libs/variables.mk
-include ./libs/printing-functions.mk
-include ./libs/helper-functions.mk
-include ./libs/docker-functions.mk
+include libs/variables.mk
+include libs/printing-functions.mk
+include libs/helper-functions.mk
+include libs/docker-functions.mk
 
 #--------------------------------------------------------------------------------------------[ Phony targets ]----------
 .PHONY : $(all_ts)
@@ -139,7 +139,7 @@ build : check_not_root isset_valid_p isset_env isset_valid_cf
 # Custom project targets points to the cutom project makefile. Users can call any custom targets prepending target name
 # with double underscores.
 #-----------------------------------------------------------------------------------------------------------------------
-__% : isset_valid_p isset_env
+__% : check_not_root isset_valid_p isset_env
 	@target=$@; \
 	target=$${target#__}; \
 	$(call override, $$target); \

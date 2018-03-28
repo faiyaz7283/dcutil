@@ -5,7 +5,7 @@ clone_project :
 			echo "Enter your git repository url: "; \
 			read repo; \
 		fi; \
-		$(call get_wd); \
+		$(call get_dcutil_project_working_dir); \
 		if [ "$$wd" ]; then \
 			cd $$wd; \
 			git clone $$repo ./$(p); \
@@ -13,7 +13,7 @@ clone_project :
 	fi
 
 pkg_mgmt :
-	@$(call get_wd); \
+	@$(call get_dcutil_project_working_dir); \
 	if [ "$$wd" ]; then \
 		cd $$wd/$(p); \
 		if [ -f "composer.json" ]; then \
@@ -28,9 +28,3 @@ pkg_mgmt :
 			$(call print_target_error, "Missing composer.json file."); \
 		fi; \
 	fi
-
-#------------------------------------------------------------------------------------------------[ Functions ]----------
-define get_wd
-	wd=`[ "$$HOST_WORKING_DIR" ] && echo $$HOST_WORKING_DIR || echo $$DEMO_TODO_WORKING_DIR`
-endef
-
