@@ -51,13 +51,14 @@ services:
     extra_hosts:
       - "${HOST_NAME}:${HOST_IP}"
     environment:
-      - MYSQL_DATABASE=${DEMO_TODO_MYSQL_DATABASE}
+      - MYSQL_DATABASE=${DEMO_TODO_MYSQL_SCHEMA}
       - MYSQL_USER=${DEMO_TODO_MYSQL_USER}
       - MYSQL_PASSWORD=${DEMO_TODO_MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${DEMO_TODO_MYSQL_ROOT_PASSWORD}
     ports:
       - "${DEMO_TODO_MYSQL_PORT}"
     volumes:
-      - "${DEMO_TODO_MYSQL_DATA}"
+      - "${MYSQL_DATABASES}"
+      - "${MYSQL_STORAGE}"
     networks:
       - backend

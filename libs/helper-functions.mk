@@ -81,10 +81,11 @@ define override
 	$(call trim, target, $(1)); \
 	target=$${target:-$@}; \
 	$(call get_custom_project_makefile); \
- 	if [ -f "$${pmf}" ] && grep -q "^$${target}\s*:" $${pmf}; then \
+	dirname=$$(dirname $${pmf}); \
+ 	if [ -f "$${pmf}" ] && grep -qr "^$${target}\s*:" $$dirname; then \
  		makefilename="$$(basename $${pmf})"; \
  		$(call print_running_target, '$${makefilename} » $$target'); \
- 		$(MAKE) -f $${pmf} -I $$(dirname $${pmf}) $$target; \
+ 		$(MAKE) -f $${pmf} -I $$dirname $$target; \
  		$(call print_completed_target, '$${makefilename} » $$target'); \
  		exit 0; \
  	fi

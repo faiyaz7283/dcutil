@@ -64,10 +64,18 @@ define docker_workstation
 	$(call export_env); \
 	$(call to_upper, pwuser, $(p)_WORKSTATION_USER); \
 	$(call to_upper, pwshell, $(p)_WORKSTATION_SHELL); \
-	[ "$${!pwuser}" ] && c_user=$${!pwuser} || c_user=root; \
-	[ "$${!pwshell}" ] && c_shell=$${!pwshell} || c_shell=sh; \
+	if [ "$${!pwuser}" ]; then \
+		c_user=$${!pwuser}; \
+	else \
+		[ "$${WORKSTATION_USER}" ] && c_user=$${WORKSTATION_USER} || c_user=root; \
+	fi; \
+	if [ "$${!pwshell}" ]; then \
+		c_shell=$${!pwshell}; \
+	else \
+		[ "$${WORKSTATION_SHELL}" ] && c_shell=$${WORKSTATION_SHELL} || c_shell=sh; \
+	fi; \
 	$(call print_container_enter, $${cmd:-login}, workstation, $${cnt_shell:-$$c_shell}, $${cnt_user:-$$c_user}); \
-	if [[ "$${cmd}" && "$(cmd)" != login ]]; then \
+	if [ "$${cmd}" -a "$${cmd}" != "login" ]; then \
 		$(docker_compose) exec --user=$${cnt_user:-$$c_user} workstation $${cnt_shell:-$$c_shell} -l -c "$(cmd)"; \
 	else \
 		$(docker_compose) exec --user=$${cnt_user:-$$c_user} workstation $${cnt_shell:-$$c_shell}; \

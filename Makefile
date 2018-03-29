@@ -13,7 +13,7 @@ show_commands commands targets:
 	if [ "$(p)" ]; then \
 		$(call get_custom_project_makefile); \
 		if [ -f "$$pmf" ]; then \
-			custom_ts=($$($(MAKE) -f $$pmf list_ts)); \
+			custom_ts=($$($(MAKE) -f $$pmf -I $$(dirname $${pmf}) list_ts)); \
 			custom_ts=($${custom_ts[@]/list_ts}); \
 			(( $${#custom_ts[@]} > 0 )) && $(call print_command, Project $(p), $${custom_ts[@]}); \
 		fi; \
@@ -143,10 +143,8 @@ __% : check_not_root isset_valid_p isset_env
 	@target=$@; \
 	target=$${target#__}; \
 	$(call override, $$target); \
-	if [ -z "$$override" ]; then \
-		$(call print_color, 1, "Cannot find target $$target."); \
-		exit 1; \
-	fi
+	$(call print_color, 1, "Cannot find target $$target."); \
+	exit 1
 
 #-------------------------------------------------------------------------------------------[ Docker targets ]----------
 # For docker_login, docker_cmd and docker_workstation use the parameters below:
@@ -157,12 +155,10 @@ __% : check_not_root isset_valid_p isset_env
 #-----------------------------------------------------------------------------------------------------------------------
 docker_% : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call override); \
-	if [ -z "$$override" ]; then \
-		$(call print_running_target); \
-		$(call extract_dcfs_for_docker_compose); \
-		$(call $@); \
-		$(call print_completed_target); \
-	fi
+	$(call print_running_target); \
+	$(call extract_dcfs_for_docker_compose); \
+	$(call $@) 2>/dev/null; \
+	$(call print_completed_target)
 
 #---------------------------------------------------------------------------[ Custom project wrapper targets ]----------
 prj_mgmt : check_not_root isset_valid_p isset_env
