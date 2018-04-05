@@ -65,17 +65,6 @@ define remove_matching_line
 	sed -i.bak -e "/$${find}/d" $$file && rm -f $${file}.bak
 endef
 
-# Determines users private IP only if Darwin/Mac or GNU/Linux.
-define get_ip
-	if [ "$$(uname)" == "Darwin" ]; then \
-		ip=$$(ipconfig getifaddr en0); \
-	elif [ "$$(expr substr $$(uname -s) 1 5)" == "Linux" ]; then \
-		ip=$$(hostname -I); \
-	elif [ "$$(expr substr $$(uname -s) 1 10)" == "MINGW32_NT" ] || [ "$$(expr substr $$(uname -s) 1 10)" == "MINGW64_NT" ]; then \
-		ip=''; \
-	fi
-endef
-
 # Override a target
 define override
 	$(call trim, target, $(1)); \

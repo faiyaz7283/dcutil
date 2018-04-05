@@ -157,7 +157,13 @@ docker_% : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call override); \
 	$(call print_running_target); \
 	$(call extract_dcfs_for_docker_compose); \
-	$(call $@) 2>/dev/null; \
+	if grep -qr "^define $@" .; then \
+		$(call $@); \
+	else \
+		$(call print_color, 1, "$@ is not defined."); \
+		$(call print_failed_target); \
+		exit 1; \
+	fi; \
 	$(call print_completed_target)
 
 #---------------------------------------------------------------------------[ Custom project wrapper targets ]----------

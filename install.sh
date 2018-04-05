@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Minimum args requirement checks
 if (( "$#" < 2 )); then
@@ -22,6 +22,8 @@ else
         exit 1
     fi
 fi
+
+
 
 # DCUTIL Logo and info
 print_logo() {
@@ -56,7 +58,7 @@ if_cmd_success() {
 # DCUTIL command
 print_dcutil_call() {
     cat << EOS
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Update self
 self_update() {
@@ -65,6 +67,7 @@ self_update() {
         echo "Updating the script."
         mv /tmp/dcutil ${program_dir}/dcutil
         chmod 755 ${program_dir}/dcutil
+        tput setaf 7; printf "Done."; tput setaf 2; printf " √\n"; tput sgr0
         return 0
     fi
 }
@@ -96,6 +99,20 @@ get_project_by_key() {
     fi
 }
 
+get_host_ip() {
+    # Determines users private IP only if Darwin/Mac or GNU/Linux.
+	if [ "\$(uname)" == "Darwin" ]; then
+		echo \$(ipconfig getifaddr en0)
+	elif [ "\$(expr substr \$(uname -s) 1 5)" == "Linux" ]; then
+		echo \$(hostname -I)
+	elif [ "\$(expr substr \$(uname -s) 1 10)" == "MINGW32_NT" ] || [ "\$(expr substr \$(uname -s) 1 10)" == "MINGW64_NT" ]; then
+		# TODO: Need to figure this out for windows users.
+		echo "Sorry unable to get IP."
+	else
+	    return 1
+	fi
+}
+
 dcutil_root=${1}
 
 if [ -d "\$dcutil_root" ]; then
@@ -104,6 +121,10 @@ if [ -d "\$dcutil_root" ]; then
         [ -f ".env" ] && export \$(cat .env | grep -v ^\\# | xargs)
         if [ "\$1" == "-u" -o "\$1" == "--update" ]; then
             self_update
+        elif [  "\$1" == "--ip" ]; then
+            if get_host_ip > /dev/null 2>&1; then
+               get_host_ip
+            fi
         elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
 			tput setaf 1; printf "Are you sure you want to remove DCUTIL from this machine ?\n"; tput sgr0
 			select choice in "Yes" "No"; do
