@@ -10,22 +10,22 @@ services:
       extra_hosts:
         - "${HOST_NAME}:${HOST_IP}"
       volumes:
-        - "${DEMO_TODO_PHPFPM71_INI}"
-        - "${DEMO_TODO_PHPFPM71_CONF}"
-        - "${DEMO_TODO_PHPFPM71_WWW_CONF}"
+        - "${DEMO_TODO_PHPFPM7_INI}"
+        - "${DEMO_TODO_PHPFPM7_CONF}"
+        - "${DEMO_TODO_PHPFPM7_WWW_CONF}"
         - "${DEMO_TODO_WORKING_DIR}:${CONTAINER_WORKING_DIR}"
       networks:
         - frontend
         - backend
 
-  phpfpm71:
-    image: ${DEMO_TODO_PHPFPM71_IMAGE}
+  phpfpm7:
+    image: ${DEMO_TODO_PHPFPM7_IMAGE}
     extra_hosts:
       - "${HOST_NAME}:${HOST_IP}"
     volumes:
-      - "${DEMO_TODO_PHPFPM71_INI}"
-      - "${DEMO_TODO_PHPFPM71_CONF}"
-      - "${DEMO_TODO_PHPFPM71_WWW_CONF}"
+      - "${DEMO_TODO_PHPFPM7_INI}"
+      - "${DEMO_TODO_PHPFPM7_CONF}"
+      - "${DEMO_TODO_PHPFPM7_WWW_CONF}"
       - "${DEMO_TODO_WORKING_DIR}:${CONTAINER_WORKING_DIR}"
     networks:
       - backend
