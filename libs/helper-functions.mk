@@ -98,7 +98,7 @@ endef
 
 # Get this project's docker compose file or return error
 define get_dcutil_project_docker_compose_files
-	pld=$$DCUTIL_LIBS_DIR; \
+	pld=$$dcutil_libs; \
 	dcfs_dir="$${pld}/docker-compose"; \
 	if [ "$$pld" -a -d "$$dcfs_dir" ]; then \
 		$(call to_upper, dcfs, $(p)_DOCKER_COMPOSE_FILES); \
@@ -118,7 +118,7 @@ endef
 
 # Get this project's make file
 define get_custom_project_makefile
-	pld=$$DCUTIL_LIBS_DIR; \
+	pld=$$dcutil_libs; \
 	mkfs_dir="$${pld}/makefiles"; \
 	if [ "$$pld" -a -d "$$mkfs_dir" ]; then \
 		$(call to_upper, pmf, $(p)_MAKE_FILE); \

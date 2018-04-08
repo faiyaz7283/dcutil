@@ -131,8 +131,8 @@ build : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call print_running_target); \
 	$(call get_dcutil_project_working_dir); \
 	$(call get_dcutil_project_docker_compose_files); \
-	$(MAKE) docker_up_detailed; \
-	$(MAKE) prj_mgmt; \
+	$(self_make) docker_up_detailed; \
+	$(self_make) prj_mgmt; \
 	$(call print_completed_target)
 
 #-----------------------------------------------------------------------------------[ Custom project targets ]----------
@@ -157,7 +157,7 @@ docker_% : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call override); \
 	$(call print_running_target); \
 	$(call extract_dcfs_for_docker_compose); \
-	if grep -qr "^define $@" .; then \
+	if grep -qr "^define $@" $$dcutil_root; then \
 		$(call $@); \
 	else \
 		$(call print_color, 1, "$@ is not defined."); \

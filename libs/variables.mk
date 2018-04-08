@@ -1,6 +1,7 @@
 #------------------------------------------------------------------------------------------------[ Variables ]----------
 SHELL := /bin/bash
 docker_compose = docker-compose -f $$docker_compose_files -p $(p)
+self_make = $(MAKE) -f "$$dcutil_root/Makefile" -I "$$dcutil_root"
 silent = false
 cnt_shell= sh
 cnt_user = root
