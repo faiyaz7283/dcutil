@@ -11,6 +11,7 @@
 #-----------------------------------------------------------------------------------------------------------------------
 define color_text
 	tput setaf $(1); \
+	[ "$3" ] && [ "$3" == "1" ] && tput bold; \
 	printf $(2); \
 	tput sgr0
 endef
@@ -103,22 +104,6 @@ define print_command
 	$(call trim, commands, $(2)); \
 	commands="$${commands// /\\n - }"; \
 	$(call print_dual_color, 7, "\n$${name} commands: \n", 2, " - $${commands}")
-endef
-
-# Print version
-define version
-	version=$$(git describe --always --tags); \
-	sha1=$$(git rev-parse HEAD); \
-	release_date=$$(git log -1 --format=%ai $$version); \
-	b=$$(tput bold); \
-	n=$$(tput sgr0); \
-	line=$$(printf "=%.0s" {1..25}); \
-	printf "\
-		$${b}DCUTIL$${n}\n\
-		- Version: $${b}$${version}$${n}\n\
-		- Released: $${b}$${release_date:0:10}$${n}\n\
-		- SHA-1: $${b}$${sha1}$${n}\
-	\n"
 endef
 
 # Print help

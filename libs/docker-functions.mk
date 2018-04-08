@@ -1,12 +1,17 @@
 #-----------------------------------------------------------------------------------------[ Docker functions ]----------
+# Start docker cnts.
+define docker_start
+	$(docker_compose) start
+endef
+
+# Stop docker cnts.
+define docker_stop
+	$(docker_compose) stop
+endef
+
 # Check projects docker cnt statuses
 define docker_ps
 	$(docker_compose) ps
-endef
-
-# Check proejcts docker images
-define docker_images
-	$(docker_compose) images
 endef
 
 # Bring up docker cnts.
@@ -23,16 +28,6 @@ endef
 # Bring down docker cnts.
 define docker_down
 	$(docker_compose) down --remove-orphans
-endef
-
-# Start docker cnts.
-define docker_start
-	$(docker_compose) start
-endef
-
-# Stop docker cnts.
-define docker_stop
-	$(docker_compose) stop
 endef
 
 # Enter a docker continer with the following parameters
@@ -81,4 +76,9 @@ define docker_workstation
 		$(docker_compose) exec --user=$${cnt_user:-$$c_user} workstation $${cnt_shell:-$$c_shell}; \
 	fi; \
 	$(call print_container_exit)
+endef
+
+# Check proejcts docker images
+define docker_images
+	$(docker_compose) images
 endef

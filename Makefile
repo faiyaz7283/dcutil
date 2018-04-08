@@ -34,9 +34,6 @@ show_projects projects : isset_env
 		done; \
 	fi
 
-version :
-	@$(call version)
-
 help man :
 	@$(call help)
 
@@ -146,14 +143,14 @@ __% : check_not_root isset_valid_p isset_env
 	$(call print_color, 1, "Cannot find target $$target."); \
 	exit 1
 
-#-------------------------------------------------------------------------------------------[ Docker targets ]----------
+#-----------------------------------------------------------------------------------[ Docker-Compose targets ]----------
 # For docker_login, docker_cmd and docker_workstation use the parameters below:
 # cmd = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
 # cnt = The service container name.
 # cnt_user = The user to enter the container.
 # cnt_shell = The container shell.
 #-----------------------------------------------------------------------------------------------------------------------
-docker_% : check_not_root isset_valid_p isset_env isset_valid_cf
+dc_% : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call override); \
 	$(call print_running_target); \
 	$(call extract_dcfs_for_docker_compose); \

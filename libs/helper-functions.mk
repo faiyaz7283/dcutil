@@ -103,7 +103,7 @@ define get_dcutil_project_docker_compose_files
 	if [ "$$pld" -a -d "$$dcfs_dir" ]; then \
 		$(call to_upper, dcfs, $(p)_DOCKER_COMPOSE_FILES); \
 		if [ "$${!dcfs}" ]; then \
-			dcfs=(`echo "$${dcfs_dir}/$${!dcfs//:/ $$dcfs_dir/}"`); \
+			dcfs=($$(echo "$${dcfs_dir}/$${!dcfs//:/ $$dcfs_dir/}")); \
 		fi; \
 	fi
 endef
@@ -112,7 +112,7 @@ endef
 define extract_dcfs_for_docker_compose
 	$(call get_dcutil_project_docker_compose_files); \
 	if [ "$$dcfs" ]; then \
-		$(call var, docker_compose_files, `echo $${dcfs//:/ -f }`); \
+		$(call var, docker_compose_files, $$(echo $${dcfs//:/ -f })); \
 	fi
 endef
 
@@ -137,7 +137,7 @@ endef
 
 # Get all available projects in an array
 define get_dcutil_projects
-	projects=(`echo $${PROJECTS//:/ }`)
+	projects=($$(echo $${PROJECTS//:/ }))
 endef
 
 # Check if the given project name exist

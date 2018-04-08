@@ -5,7 +5,7 @@ if (( "$#" < 2 )); then
     echo "Not enough arguments."
     exit 1
 else
-    # Arg 1 dir check
+    # Arg 1 check
     if [ "$1" -a -d "$1" ]; then
         program_dir="${1%/}"
     else
@@ -39,7 +39,10 @@ local_repo_root="${install_dir}/${local_repo_name}"
 
 # Print messages in color
 print_cl() {
-    tput setaf "${1}"; printf "${2}" tput sgr0
+    tput setaf "${1}"
+    [ "$3" -a "$3" == "1" ] && tput bold
+    printf "${2}"
+    tput sgr0
 }
 
 # Logo and info
@@ -50,7 +53,7 @@ print_logo() {
     print_cl 6 ' \ \____-  \ \_____\  \ \_____\    \ \_\  \ \_\  \ \_____\ \n';
     print_cl 6 '  \/____/   \/_____/   \/_____/     \/_/   \/_/   \/_____/ \n';
     print_cl 3 '                         A docker-compose utility for devs.\n';
-    print_cl 3 "    Copyright (c) $(date +%Y) Faiyaz Haider under the MIT License.\n";
+    print_cl 3 "    Copyright (c) $(date +%Y) Faiyaz Haider under the MIT License.\n" 1;
 }
 
 # If command runs successfully, then proceed, else exit out of the script
@@ -73,28 +76,35 @@ this_script="\${program_dir}/${this_name}"
 export ${this_name}_libs="${libs_dir}"
 export ${this_name}_root="$1"
 
+# Print messages in color
+print_cl() {
+    tput setaf "\$1"
+    [ "\$3" -a "\$3" == "1" ] && tput bold
+    printf "\$2"
+    tput sgr0
+}
+
 # Update ${this_name} script
 self_update() {
     \${${this_name}_root}/install.sh \${program_dir} \${${this_name}_libs} \$(dirname \${${this_name}_root})
     if [ -f "/tmp/${this_name}" ]; then
-        tput setaf 3; printf "Updating the script...\n"; tput sgr0
+        print_cl 3 "Updating the script...\n" 1
         mv /tmp/${this_name} \${this_script}
         chmod 755 \${this_script}
-        tput setaf 7; printf "Done."; tput setaf 2; printf " √\n"; tput sgr0
+        print_cl 7 "Done."; print_cl 2 " √\n"
         return 0
     fi
 }
 
 # Spit our general info
 generic_info() {
-    g="man"
-    b=\$(tput bold)
-    n=\$(tput sgr0)
-    line=\$(printf "=%.0s" {1..25})
-    echo "\${b}Usage:\${n} ${this_name} [ options ] [ parameters ] <target>"
-    echo "\${line}"
-    echo "Please visit \${b}${remote_repo_url}\${n} for more info and usage details."
-    echo "Copyright (c) \$(date +%Y) Faiyaz Haider under MIT License."
+    print_cl 7 "Usage: " 1;
+    print_cl 7 "${this_name} ["; print_cl 3 "options" 1; print_cl 7 "] "
+    print_cl 7 "["; print_cl 3 "parameters" 1; print_cl 7 "] "
+    print_cl 7 "<"; print_cl 3 "target" 1; print_cl 7 ">\n"
+    print_cl 7 "\n"
+    print_cl 7 "Please visit "; print_cl 4 "${remote_repo_url} " 1; print_cl 7 "for more info and usage details.\n"
+    print_cl 7 "Copyright (c) "; print_cl 6 "\$(date +%Y) " 1; print_cl 7 "Faiyaz Haider under the "; print_cl 6 "MIT " 1; print_cl 7 "License.\n"
 }
 
 set_${this_name}_location() {
@@ -103,7 +113,7 @@ set_${this_name}_location() {
         if git rev-parse --git-dir 2>/dev/null 1>&2; then
             if [[  \$(git remote get-url origin) = *"faiyaz7283/${this_name}"* ]]; then
                 if [ "\$1" != "\${program_dir}/${local_repo_name}" -a "\$1" != "\$${this_name}_root" ]; then
-                    find=\`grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+\$" \${this_script}\`
+                    find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+\$" \${this_script})
                     sed -i.bak -e "s#\$find#export ${this_name}_root=\\"\$1\\"#" \${this_script} && rm -f \${this_script}.bak
                 fi
             fi
@@ -113,18 +123,18 @@ set_${this_name}_location() {
 
 set_${this_name}_lib_location() {
     if [ -d "\$1" ]; then
-        find=\`grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+" \${this_script}\`
+        find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+" \${this_script})
         sed -i.bak -e "s#\$find#export ${this_name}_libs=\\"\$1\\"#" \${this_script} && rm -f \${this_script}.bak
     fi
 }
 
 project_exists() {
-    projects=(\`echo \${PROJECTS//:/ }\`)
+    projects=(\$(echo \${PROJECTS//:/ }))
     [[ "\${projects[@]}" =~ "\${1}" ]] && return 0 || return 1
 }
 
 get_project_by_key() {
-    projects=(\`echo \${PROJECTS//:/ }\`)
+    projects=(\$(echo \${PROJECTS//:/ }))
 	if (( "\${1}" > 0 )); then
         project=\${projects["\$(( \${1} - 1 ))"]}
         [ "\$project" ] && echo \$project || return 1
@@ -160,12 +170,12 @@ if [ -d "\$${this_name}_root" ]; then
                     get_host_ip
                 fi
             elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
-                tput setaf 1; printf "Are you sure you want to remove ${this_title} from this machine ?\n"; tput sgr0
+                print_cl 1 "Are you sure you want to remove "; print_cl 7 "${this_title} " 1; print_cl 1"from this machine ?\n"
                 select choice in "Yes" "No"; do
                     case \$choice in
                         Yes ) rm -rf \${${this_name}_root} && rm -- "\${this_script}"
-                            tput setaf 6; printf "${this_title} is now removed from this machine.\n"
-                            tput setaf 7; printf "Thank you for using. Goodbye.\n"; tput sgr0
+                            print_cl 7 "${this_title} " 1; print_cl 6 "is now removed from this machine.\n"
+                            print_cl 7 "Thank you for using. Goodbye.\n"
                             break;;
                         No )  exit;;
                         * ) echo "Please enter 1 for Yes or 2 for No.";;
@@ -174,7 +184,14 @@ if [ -d "\$${this_name}_root" ]; then
             elif [ "\$1" == "-h" -o "\$1" == "--help" -o "\$1" == "--man" ]; then
                 \${self_make} help
             elif [ "\$1" == "-v" -o "\$1" == "--version" ]; then
-                \${self_make} version
+                cd \$dcutil_root
+                version=\$(git describe --always --tags)
+                sha1=\$(git rev-parse HEAD)
+                release_date=\$(git log -1 --format=%ai \$version)
+                print_cl 3 " DCUTIL\n" 1
+                print_cl 7 " - Version: "; print_cl 2 "\${version}\n" 1
+                print_cl 7 " - Released: "; print_cl 2 "\${release_date:0:10}\n" 1
+                print_cl 7 " - SHA-1: "; print_cl 2 "\${sha1}\n" 1
             else
                 if [ "\$#" == 0 ]; then
                     generic_info
@@ -187,10 +204,10 @@ if [ -d "\$${this_name}_root" ]; then
                     pattern='^[0-9]+\$'
                     if [[ \$1 =~ \$pattern ]]; then
                         if get_project_by_key \$1 2>/dev/null 1>&2; then
-                            project="p=\`get_project_by_key \$1\`"
+                            project="p=\$(get_project_by_key \$1)"
                             shift
                         else
-                            tput setaf 1; printf "Invalid key \$1\n"; tput sgr0
+                            print_cl 1 "Invalid key \$1\n"
                             exit 1
                         fi
                     elif [[ ! \$1 =~ "=" ]]; then
@@ -209,66 +226,66 @@ if [ -d "\$${this_name}_root" ]; then
             fi
         )
     else
-        tput setaf 1; printf "Missing ${this_title} libs directory.\n"; tput sgr0
+        print_cl 1 "Missing ${this_title} libs directory.\n"
         exit 1
     fi
 else
-    tput setaf 1; printf "${this_title} project could not be located\n"
-    tput setaf 3; printf "What would you like to do ?\n"; tput sgr0
+    print_cl 1 "${this_title} project could not be located\n"
+    print_cl 3 "What would you like to do ?\n"
     select choice in "Clone from git repo" "Change directory" "Nothing"; do
         case \$choice in
             'Clone from git repo' )
-                    tput setaf 3; printf "Where would you like to place ${this_title} project: (Default \$program_dir)\n"; tput sgr0
+                    print_cl 3 "Where would you like to place ${this_title} project: (Default \$program_dir)\n"
                     read ${this_name}_install_dir
                     ${this_name}_install_dir=\${${this_name}_install_dir:-\$program_dir}
 
                     # Verify directory exist
                     until [ -d "\${${this_name}_install_dir/#\~/\$HOME}" ]
                     do
-                        tput setaf 1; printf "Unable to find the directory '\${${this_name}_install_dir}', please try again.\n"
-                        tput setaf 8; printf "Check the spelling and make sure the directory exist.\n"; tput sgr0
+                        print_cl 1 "Unable to find the directory '\${${this_name}_install_dir}', please try again.\n"
+                        print_cl 8 "Check the spelling and make sure the directory exist.\n"
                         read ${this_name}_install_dir
                         ${this_name}_install_dir=\${${this_name}_install_dir:-\$program_dir}
                     done
                     ${this_name}_install_dir=\${${this_name}_install_dir%/}
-                    tput setaf 6; printf "Cloning ${this_title} in directory \${${this_name}_install_dir}\n"; tput sgr0
+                    print_cl 6 "Cloning ${this_title} in directory \${${this_name}_install_dir}\n"
                     git clone ${remote_repo_url} \${${this_name}_install_dir}/${local_repo_name}
                     cd \${${this_name}_install_dir}/${local_repo_name}
                     git submodule update --init --recursive
 
                     set_${this_name}_location \${${this_name}_install_dir}/${local_repo_name}
-                    tput setaf 2; printf "Cloned.\n\n"; tput sgr0
+                    print_cl 2 "Cloned.\n\n"
                     exec "\$0" "\$@"
                     break;;
             'Change directory' )
                     while true; do
-                        tput setaf 3; printf "What is the new location of the ${this_title} project? Please enter full path including the ${this_title} root directory.\n"; tput sgr0
+                        print_cl 3 "What is the new location of the ${this_title} project? Please enter full path including the ${this_title} root directory.\n"
                         read new_${this_name}_root_dir
                         new_${this_name}_root_dir=\${new_${this_name}_root_dir/#\~/\$HOME}
 
                         # Verify directory exist
                         until [ -d "\${new_${this_name}_root_dir}" ]
                         do
-                            tput setaf 1; printf "Unable to find the directory '\${new_${this_name}_root_dir}', please try again.\n"
-                            tput setaf 8; printf "Check the spelling and make sure the directory exist.\n"; tput sgr0
+                            print_cl 1 "Unable to find the directory '\${new_${this_name}_root_dir}', please try again.\n"
+                            print_cl 8 "Check the spelling and make sure the directory exist.\n"
                             read new_${this_name}_root_dir
                             new_${this_name}_root_dir=\${new_${this_name}_root_dir/#\~/\$HOME}
                         done
                         new_${this_name}_root_dir=\${new_${this_name}_root_dir%/}
 
                         if set_${this_name}_location \${new_${this_name}_root_dir}; then
-                            tput setaf 2; printf "Directory changed.\n\n"; tput sgr0
+                            print_cl 2 "Directory changed.\n\n"
                             exec "\$0" "\$@"
                             break
                         fi
 
-                        tput setaf 1; printf "\${new_${this_name}_root_dir} doesn't seem to be the correct directory for ${this_title}.\n"; tput sgr0
+                       print_cl 1 "\${new_${this_name}_root_dir} doesn't seem to be the correct directory for ${this_title}.\n"
                         continue
                     done;;
             Nothing )
-                    tput setaf 1; printf "\nYou need to have the ${this_title} repo for the command ${this_name} to work.\n"; tput sgr0
-                    tput setaf 7; printf "You can manually clone the project at ${remote_repo_url}.\n"; tput sgr0
-                    tput setaf 7; printf "Goodbye.\n\n"; tput sgr0
+                    print_cl 1 "\nYou need to have the "; print_cl 7 "${this_title} " 1; print_cl 1 "repo for the command "; print_cl 7 "${this_name} " 1; print_cl 1" to work.\n"
+                    print_cl 7 "You can manually clone the project at "; print_cl 3 "${remote_repo_url}.\n" 1
+                    print_cl 7 "Goodbye.\n\n"
                     exit;;
             * )     echo "Please enter 1 for clone, 2 to change to new location, 3 for do nothing.";;
         esac
@@ -285,7 +302,7 @@ if cd "${local_repo_root}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/nu
     fi
 else
     print_cl 1 "${this_title} does not exist.\n"
-    print_cl 3 "Cloning ${this_title}...\n"
+    print_cl 3 "Cloning ${this_title}...\n" 1
     if_cmd_success "git clone ${remote_repo_url} ${local_repo_root}" "${this_title} cloned."
     cd "${local_repo_root}" && git submodule update --init --recursive
 fi
@@ -295,7 +312,7 @@ if [ ! -f "${this_script}" ]; then
     print_cl 3 "Adding '${this_name}' command in your ${program_dir} directory.\n"
     print_command_script "${local_repo_root}" > "${this_script}"
     chmod 755 "${this_script}"
-    print_cl 2 "Done. Make sure ${program_dir} is in your PATH.\n\n"
+    print_cl 2 "Done. Make sure "; print_cl 7 "${program_dir} " 1; print_cl 2 "is in your PATH.\n\n"
     print_logo
 elif [ "$(print_command_script ${local_repo_root})" != "$(cat ${this_script})" ]; then
     print_cl 7 "Script: "; print_cl 1 "outdated.\n"
