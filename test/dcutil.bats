@@ -6,9 +6,17 @@ load '../libs/bats-assert/load'
 @test "Invoking dcutil without any arguments return basic message" {
     run dcutil
     assert_success
-    assert_line --index 0 --partial "dcutil [ options ] [ parameters ] <target>"
+    assert_line --index 0 --partial "Usage:"
+    assert_line --index 0 --partial "dcutil"
+    assert_line --index 0 --partial "options"
+    assert_line --index 0 --partial "parameters"
+    assert_line --index 0 --partial "target"
     assert_line --index 2 --partial "https://github.com/faiyaz7283/dcutil"
-    assert_line --index 3 --partial "Copyright (c) 2018 Faiyaz Haider under MIT License."
+    assert_line --index 3 --partial "Copyright (c)"
+    assert_line --index 3 --partial "$(date +%Y)"
+    assert_line --index 3 --partial "Faiyaz Haider"
+    assert_line --index 3 --partial "MIT"
+    assert_line --index 3 --partial "License."
 }
 
 @test "Invoking dcutil with -h, --help, --man option flags return DCUTIL Manual message" {
@@ -26,10 +34,14 @@ load '../libs/bats-assert/load'
 @test "Running -r, --remove option flags with dcutil prompts for a selection" {
     run bash -c "yes 2 | dcutil -r"
     assert_success
-    assert_line --index 0 --partial "Are you sure you want to remove DCUTIL from this machine ?"
+    assert_line --index 0 --partial "Are you sure you want to remove"
+    assert_line --index 0 --partial "DCUTIL"
+    assert_line --index 0 --partial "from this machine ?"
     run bash -c "yes 2 | dcutil --remove"
     assert_success
-    assert_line --index 0 --partial "Are you sure you want to remove DCUTIL from this machine ?"
+    assert_line --index 0 --partial "Are you sure you want to remove"
+    assert_line --index 0 --partial "DCUTIL"
+    assert_line --index 0 --partial "from this machine ?"
 }
 
 @test "Invoking dcutil with -v, --version option flags return DCUTIL version and info" {

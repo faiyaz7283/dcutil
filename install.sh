@@ -103,7 +103,7 @@ generic_info() {
     print_cl 7 "["; print_cl 3 "parameters" 1; print_cl 7 "] "
     print_cl 7 "<"; print_cl 3 "target" 1; print_cl 7 ">\n"
     print_cl 7 "\n"
-    print_cl 7 "Please visit "; print_cl 4 "${remote_repo_url} " 1; print_cl 7 "for more info and usage details.\n"
+    print_cl 7 "Please visit "; print_cl 4 "${remote_repo_url%.git} " 1; print_cl 7 "for more info and usage details.\n"
     print_cl 7 "Copyright (c) "; print_cl 6 "\$(date +%Y) " 1; print_cl 7 "Faiyaz Haider under the "; print_cl 6 "MIT " 1; print_cl 7 "License.\n"
 }
 
@@ -170,7 +170,7 @@ if [ -d "\$${this_name}_root" ]; then
                     get_host_ip
                 fi
             elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
-                print_cl 1 "Are you sure you want to remove "; print_cl 7 "${this_title} " 1; print_cl 1"from this machine ?\n"
+                print_cl 1 "Are you sure you want to remove "; print_cl 7 "${this_title} " 1; print_cl 1 "from this machine ?\n"
                 select choice in "Yes" "No"; do
                     case \$choice in
                         Yes ) rm -rf \${${this_name}_root} && rm -- "\${this_script}"
