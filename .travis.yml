@@ -6,8 +6,9 @@ before_install:
   - dcutil_program_installation_dir=/tmp/local/bin
   - mkdir -p $dcutil_program_installation_dir
   - export PATH=$PATH:$dcutil_program_installation_dir
-  - dcutil_project_installation_dir="$(dirname $(pwd))"
-  - ./install.sh $dcutil_program_installation_dir $dcutil_project_installation_dir
+  - dcutil_dir="$(dirname $(pwd))"
+  - mv ${dcutil_dir}/dcutil ${dcutil_program_installation_dir}/.dcutil
+  - ./install.sh $dcutil_program_installation_dir $dcutil_dir
   - source ~/.bashrc && source ~/.bash_profile
 
 script:

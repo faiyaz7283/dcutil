@@ -5,11 +5,6 @@ if (( "$#" < 2 )); then
     echo "Not enough arguments."
     exit 1
 else
-    remote_repo_url="https://github.com/faiyaz7283/dcutil.git"
-    local_repo_name=".dcutil"
-    this_name="dcutil"
-    this_title="DCUTIL"
-
     # Arg 1 dir check
     if [ "$1" -a -d "$1" ]; then
         program_dir="${1%/}"
@@ -28,11 +23,19 @@ else
 
     # Arg 3 check
     if [ "$3" -a -d "$3" ]; then
-        install_dir="${2%/}"
+        install_dir="${3%/}"
     else
         install_dir="${program_dir}"
     fi
 fi
+
+# Variables
+this_name="dcutil"
+this_title="DCUTIL"
+this_script="${program_dir}/${this_name}"
+remote_repo_url="https://github.com/faiyaz7283/dcutil.git"
+local_repo_name=".dcutil"
+local_repo_root="${install_dir}/${local_repo_name}"
 
 # Print messages in color
 print_cl() {
@@ -66,19 +69,17 @@ print_command_script() {
 #!/bin/bash
 
 export program_dir="${program_dir}"
+this_script="\${program_dir}/${this_name}"
 export ${this_name}_libs="${libs_dir}"
 export ${this_name}_root="$1"
-if [ -z "\$${this_name}_root" ]; then
-    export ${this_name}_root="\${program_dir}/${local_repo_name}"
-fi
 
 # Update ${this_name} script
 self_update() {
     \${${this_name}_root}/install.sh \${program_dir} \${${this_name}_libs} \$(dirname \${${this_name}_root})
     if [ -f "/tmp/${this_name}" ]; then
-        echo "Updating the script."
-        mv /tmp/${this_name} \${program_dir}/${this_name}
-        chmod 755 \${program_dir}/${this_name}
+        tput setaf 3; printf "Updating the script...\n"; tput sgr0
+        mv /tmp/${this_name} \${this_script}
+        chmod 755 \${this_script}
         tput setaf 7; printf "Done."; tput setaf 2; printf " √\n"; tput sgr0
         return 0
     fi
@@ -102,8 +103,8 @@ set_${this_name}_location() {
         if git rev-parse --git-dir 2>/dev/null 1>&2; then
             if [[  \$(git remote get-url origin) = *"faiyaz7283/${this_name}"* ]]; then
                 if [ "\$1" != "\${program_dir}/${local_repo_name}" -a "\$1" != "\$${this_name}_root" ]; then
-                    find=\`grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+\$" \${BASH_SOURCE[0]}\`
-                    sed -i.bak -e "s#\$find#export ${this_name}_root=\\"\$1\\"#" \${BASH_SOURCE[0]} && rm -f \${BASH_SOURCE[0]}.bak
+                    find=\`grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+\$" \${this_script}\`
+                    sed -i.bak -e "s#\$find#export ${this_name}_root=\\"\$1\\"#" \${this_script} && rm -f \${this_script}.bak
                 fi
             fi
         fi
@@ -112,8 +113,8 @@ set_${this_name}_location() {
 
 set_${this_name}_lib_location() {
     if [ -d "\$1" ]; then
-        find=\`grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+" \${BASH_SOURCE[0]}\`
-        sed -i.bak -e "s#\$find#export ${this_name}_libs=\\"\$1\\"#" \${BASH_SOURCE[0]} && rm -f \${BASH_SOURCE[0]}.bak
+        find=\`grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+" \${this_script}\`
+        sed -i.bak -e "s#\$find#export ${this_name}_libs=\\"\$1\\"#" \${this_script} && rm -f \${this_script}.bak
     fi
 }
 
@@ -162,7 +163,7 @@ if [ -d "\$${this_name}_root" ]; then
                 tput setaf 1; printf "Are you sure you want to remove ${this_title} from this machine ?\n"; tput sgr0
                 select choice in "Yes" "No"; do
                     case \$choice in
-                        Yes ) rm -rf \${${this_name}_root} && rm -- "\${BASH_SOURCE[0]}"
+                        Yes ) rm -rf \${${this_name}_root} && rm -- "\${this_script}"
                             tput setaf 6; printf "${this_title} is now removed from this machine.\n"
                             tput setaf 7; printf "Thank you for using. Goodbye.\n"; tput sgr0
                             break;;
@@ -278,27 +279,27 @@ EOS
 
 # Business...
 # Add project if it doesn't exist.
-if cd "${install_dir}/${local_repo_name}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
+if cd "${local_repo_root}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
     if git fetch -q --all --prune && git pull -q; then
         print_cl 7 "Repo: "; print_cl 2 "up to date.\n"
     fi
 else
-    print_cl 7 "${this_title} does not exist."
-    print_cl 3 "Cloning ${this_title} from git repo...\n"
-    if_cmd_success "git clone ${remote_repo_url} ${install_dir}/${local_repo_name}" "${this_title} cloned."
-    cd "${install_dir}/${local_repo_name}" && git submodule update --init --recursive
+    print_cl 1 "${this_title} does not exist.\n"
+    print_cl 3 "Cloning ${this_title}...\n"
+    if_cmd_success "git clone ${remote_repo_url} ${local_repo_root}" "${this_title} cloned."
+    cd "${local_repo_root}" && git submodule update --init --recursive
 fi
 
-if [ ! -f "${program_dir}/${this_name}" ]; then
+if [ ! -f "${this_script}" ]; then
     # Set the command
-    print_cl 3 "Adding the '${this_name}' command in your ${program_dir} directory.\n"
-    print_command_script "${install_dir}/${local_repo_name}" > "${program_dir}/${this_name}"
-    chmod 755 "${program_dir}/${this_name}"
+    print_cl 3 "Adding '${this_name}' command in your ${program_dir} directory.\n"
+    print_command_script "${local_repo_root}" > "${this_script}"
+    chmod 755 "${this_script}"
     print_cl 2 "Done. Make sure ${program_dir} is in your PATH.\n\n"
     print_logo
-elif [ "$(print_command_script ${install_dir}/${local_repo_name})" != "$(cat ${program_dir}/${this_name})" ]; then
+elif [ "$(print_command_script ${local_repo_root})" != "$(cat ${this_script})" ]; then
     print_cl 7 "Script: "; print_cl 1 "outdated.\n"
-    print_command_script "${install_dir}/${local_repo_name}" > "/tmp/${this_name}"
+    print_command_script "${local_repo_root}" > "/tmp/${this_name}"
 else
     print_cl 7 "Script: "; print_cl 2 "up to date.\n"
 fi
