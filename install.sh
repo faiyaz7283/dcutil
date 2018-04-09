@@ -1,14 +1,14 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 this_name="dcutil"
 this_title="$(echo "${this_name}" | tr '[:lower:]' '[:upper:]')"
 remote_repo_url="https://github.com/faiyaz7283/${this_name}.git"
 if [ "$(command -v ${this_name})" ]; then
-    set_script="$(cutil --var ${this_name}_script)"
+    set_script="$(dcutil --var ${this_name}_script)"
     script_dir="$(basename ${set_script})"
-    set_libs_dir="$(cutil --var ${this_name}_libs)"
-    set_install_dir="$(cutil --var ${this_name}_root)"
+    set_libs_dir="$(dcutil --var ${this_name}_libs)"
+    set_install_dir="$(dcutil --var ${this_name}_root)"
     exist=1
 fi
 
@@ -58,7 +58,7 @@ fi
 # Print messages in color
 cl() {
     tput setaf "${1}"
-    [ "$3" -a "$3" == "1" ] && tput bold
+    [ "${3:-}" -a "${3:-}" == "1" ] && tput bold
     printf "${2}"
     tput sgr0
 }
@@ -88,6 +88,7 @@ if_cmd_success() {
 print_command_script() {
     cat << EOS
 #!/bin/bash
+set -euo pipefail
 
 export ${this_name}_script_dir="${script_dir}"
 export ${this_name}_script="${set_script}"
