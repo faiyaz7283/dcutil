@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-# Init vars
 this_name="dcutil"
-this_title="DCUTIL"
-remote_repo_url="https://github.com/faiyaz7283/dcutil.git"
-if [ "$(command -v 'dcutil')" ]; then
+this_title="$(echo "${this_name}" | tr '[:lower:]' '[:upper:]')"
+remote_repo_url="https://github.com/faiyaz7283/${this_name}.git"
+if [ "$(command -v ${this_name})" ]; then
     set_script="$(cutil --var ${this_name}_script)"
     script_dir="$(basename ${set_script})"
     set_libs_dir="$(cutil --var ${this_name}_libs)"
@@ -324,7 +323,7 @@ EOS
 # Business... Installation
 if [ -z "$exist" ]; then
     if [ -d ${set_install_dir} -a -n "$(ls -A ${set_install_dir} 2>/dev/null)" ]; then
-        cl 1 "${set_install_dir} already exists and is not empty."
+        cl 1 "${this_title} repo already exists in ${set_install_dir}.\n"
     else
         # Adding repo
         cl 3 "Cloning ${this_title}...\n" 1
@@ -333,7 +332,7 @@ if [ -z "$exist" ]; then
     fi
 
     if [ -f "${set_script}" ]; then
-        cl 1 "${this_title} already exists."
+        cl 1 "${this_title} command script already exists in ${script_dir}.\n"
     else
         # Set the command script
         cl 3 "Adding '${this_name}' command in your ${script_dir} directory.\n"
