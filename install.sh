@@ -325,7 +325,6 @@ EOS
 if [ -z "$exist" ]; then
     if [ -d ${set_install_dir} -a -n "$(ls -A ${set_install_dir} 2>/dev/null)" ]; then
         cl 1 "${set_install_dir} already exists and is not empty."
-        exit 1
     else
         # Adding repo
         cl 3 "Cloning ${this_title}...\n" 1
@@ -335,7 +334,6 @@ if [ -z "$exist" ]; then
 
     if [ -f "${set_script}" ]; then
         cl 1 "${this_title} already exists."
-        exit 1
     else
         # Set the command script
         cl 3 "Adding '${this_name}' command in your ${script_dir} directory.\n"
