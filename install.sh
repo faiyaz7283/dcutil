@@ -1,60 +1,54 @@
 #!/bin/bash
+set -e
 
-# Required vars
+# Init vars
 this_name="dcutil"
 this_title="DCUTIL"
-set_script="${this_name}_script"
-set_libs_dir="${this_name}_libs"
-set_installed_dir="${this_name}_root"
+remote_repo_url="https://github.com/faiyaz7283/dcutil.git"
+set_script="$(dcutil --var ${this_name}_script)"
+script_dir="$(basename ${set_script})"
+set_libs_dir="$(dcutil --var ${this_name}_libs)"
+set_install_dir="$(dcutil --var ${this_name}_root)"
+[ "$set_script" -a  "$set_libs_dir" -a "$set_install_dir" ] && exist=1 || exist=0
 
-# Arg 1 check
-if [ -d "$1" ]; then
-    script_dir="${1%/}"
-    this_script="${script_dir}/${this_name}"
-else
-    if [ -z "${!set_script}" ]; then
-        echo "Argument 1 required, and must be a valid directory."
+if [ "$exist" == 0 ]; then
+    if (( "$#" < 3  )); then
+        echo "Not enough arguments."
         exit 1
     else
-        script_dir="$(dirname ${!set_script})"
-        this_script="${!set_script}"
-    fi
-fi
+        # Arg 1: Script installation directory
+        if [ -d "$1" ]; then
+            script_dir="${1%/}"
+            set_script="${script_dir}/${this_name}"
+        else
+            echo "Argument 1 must be a valid directory."
+            exit 1
+        fi
 
-# Arg 2 check
-if [ "$2" ]; then
-    libs_root="${2%/}"
-else
-    if [ "${!set_libs_dir}" ]; then
-        libs_root="${!set_libs_dir}"
+        # Arg 2: Libs directory
+        if [ -d "$2" ]; then
+            set_libs_dir="${2%/}"
+        else
+            echo "Argument 2 must be a valid directory."
+            exit 1
+        fi
+
+        # Arg 3: Repo directory
+        if [ -d "$3" ]; then
+            set_install_dir="${3%/}"
+        else
+            echo "Argument 3 must be a valid directory."
+            exit 1
+        fi
+    fi
+
+    if [ "$set_install_dir" == "$script_dir" ] || [[ "$set_install_dir" = *"bin"* ]]; then
+        set_install_dir="${set_install_dir}/.${this_name}"
     else
-        libs_root="${HOME}/${this_name}-libs"
+        set_install_dir="${set_install_dir}/${this_name}"
     fi
 fi
 
-# Arg 3 check
-if [ "$3" -a -d "$3" ]; then
-    install_dir="${3%/}"
-else
-    if [ "${!set_installed_dir}" ]; then
-        install_dir="${!set_installed_dir}"
-    else
-        install_dir="${script_dir}"
-    fi
-fi
-
-if (( "$#" == 0 )); then
-    echo "Not enough arguments."
-    exit 1
-fi
-
-# Other vars
-remote_repo_url="https://github.com/faiyaz7283/${this_name}.git"
-if [ "$install_dir" == "$script_dir" ] || [[ "$install_dir" = *"bin"* ]]; then
-    local_repo_root="${install_dir}/.${this_name}"
-else
-    local_repo_root="${install_dir}/${this_name}"
-fi
 
 # Print messages in color
 cl() {
@@ -91,9 +85,9 @@ print_command_script() {
 #!/bin/bash
 
 export ${this_name}_script_dir="${script_dir}"
-export ${this_name}_script="\${${this_name}_script_dir}/${this_name}"
-export ${this_name}_libs="${libs_root}"
-export ${this_name}_root="$1"
+export ${this_name}_script="${set_script}"
+export ${this_name}_libs="${set_libs_dir}"
+export ${this_name}_root="${set_install_dir}"
 
 # Print messages in color
 cl() {
@@ -101,6 +95,11 @@ cl() {
     [ "\$3" -a "\$3" == "1" ] && tput bold
     printf "\$2"
     tput sgr0
+}
+
+# Pass down variables to calling scripts
+get_var() {
+    var=\$1; [ "\${!var}" ] && echo \${!var}
 }
 
 # Update ${this_name} script
@@ -207,6 +206,8 @@ if [ -d "\$${this_name}_root" ]; then
                 cl 7 " - Version: "; cl 2 "\${version}\n" 1
                 cl 7 " - Released: "; cl 2 "\${release_date:0:10}\n" 1
                 cl 7 " - SHA-1: "; cl 2 "\${sha1}\n" 1
+            elif [ "\$1" == "--var" ]; then
+                [ "\$2" ] && get_var \$2
             else
                 if [ "\$#" == 0 ]; then
                     generic_info
@@ -315,29 +316,31 @@ EOS
 }
 
 # Business...
-# Add project if it doesn't exist.
-if cd "${local_repo_root}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
-    if git fetch -q --all --prune && git pull -q; then
-        cl 7 "Repo: "; cl 2 "up to date.\n"
-    fi
-else
-    cl 1 "${this_title} does not exist.\n"
+if [ "$exist" -eq 0 ]; then
+    # Adding repo
     cl 3 "Cloning ${this_title}...\n" 1
-    if_cmd_success "git clone ${remote_repo_url} ${local_repo_root}" "${this_title} cloned."
+    if_cmd_success "git clone ${remote_repo_url} ${set_install_dir}" "${this_title} cloned."
+    cd "${set_install_dir}" && git submodule update --init --recursive
 
-    cd "${local_repo_root}" && git submodule update --init --recursive
-fi
-
-if [ ! -f "${this_script}" ]; then
-    # Set the command
+    # Set the command script
     cl 3 "Adding '${this_name}' command in your ${script_dir} directory.\n"
-    print_command_script "${local_repo_root}" > "${this_script}"
-    chmod 755 "${this_script}"
+    print_command_script > "${set_script}"
+    chmod 755 "${set_script}"
     cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
     print_logo
-elif [ "$(print_command_script ${local_repo_root})" != "$(cat ${this_script})" ]; then
-    cl 7 "Script: "; cl 1 "outdated.\n"
-    print_command_script "${local_repo_root}" > "/tmp/${this_name}"
-else
-    cl 7 "Script: "; cl 2 "up to date.\n"
+fi
+
+if [ "$exist" -eq 1 ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
+    if cd "${set_install_dir}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
+        if git fetch -q --all --prune && git pull -q; then
+            cl 7 "Repo: "; cl 2 "up to date.\n"
+        fi
+    fi
+
+    if [ "$(print_command_script)" != "$(cat ${set_script})" ]; then
+        cl 7 "Script: "; cl 1 "outdated.\n"
+        print_command_script > "/tmp/${this_name}"
+    else
+        cl 7 "Script: "; cl 2 "up to date.\n"
+    fi
 fi
