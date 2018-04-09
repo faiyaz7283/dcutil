@@ -14,7 +14,7 @@ if [ "$(command -v 'dcutil')" ]; then
 fi
 
 if [ -z "$exist" ]; then
-    if (( "$#" < 3  )); then
+    if (( "$#" < 2  )); then
         echo "Not enough arguments."
         exit 1
     else
@@ -35,12 +35,16 @@ if [ -z "$exist" ]; then
             exit 1
         fi
 
-        # Arg 3: Repo directory
-        if [ -d "$3" ]; then
-            set_install_dir="${3%/}"
+        # Arg 3: Repo directory. (Defaults to script directory)
+        if [ "$3" ]; then
+            if [ -d "$3" ]; then
+                set_install_dir="${3%/}"
+            else
+                echo "Argument 3 must be a valid directory."
+                exit 1
+            fi
         else
-            echo "Argument 3 must be a valid directory."
-            exit 1
+            set_install_dir="${script_dir}"
         fi
     fi
 
