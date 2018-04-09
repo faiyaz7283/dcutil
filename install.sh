@@ -345,7 +345,7 @@ if [ -z "${exist:-}" ]; then
 fi
 
 # Update only if call made from command script
-if [ "${exist:-}" -a "$exist" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
+if [ "${exist:-}" -a "${exist:-}" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
     if cd "${set_install_dir}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
         if git fetch -q --all --prune && git pull -q; then
             cl 7 "Repo: "; cl 2 "up to date.\n"
