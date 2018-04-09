@@ -5,13 +5,15 @@ set -e
 this_name="dcutil"
 this_title="DCUTIL"
 remote_repo_url="https://github.com/faiyaz7283/dcutil.git"
-set_script="$(dcutil --var ${this_name}_script)"
-script_dir="$(basename ${set_script})"
-set_libs_dir="$(dcutil --var ${this_name}_libs)"
-set_install_dir="$(dcutil --var ${this_name}_root)"
-[ "$set_script" -a  "$set_libs_dir" -a "$set_install_dir" ] && exist=1 || exist=0
+if [ "$(command -v 'dcutil')" ]; then
+    set_script="$(cutil --var ${this_name}_script)"
+    script_dir="$(basename ${set_script})"
+    set_libs_dir="$(cutil --var ${this_name}_libs)"
+    set_install_dir="$(cutil --var ${this_name}_root)"
+    exist=1
+fi
 
-if [ "$exist" == 0 ]; then
+if [ -z "$exist" ]; then
     if (( "$#" < 3  )); then
         echo "Not enough arguments."
         exit 1
@@ -315,8 +317,8 @@ fi
 EOS
 }
 
-# Business...
-if [ "$exist" -eq 0 ]; then
+# Business... Installation
+if [ -z "$exist" ]; then
     # Adding repo
     cl 3 "Cloning ${this_title}...\n" 1
     if_cmd_success "git clone ${remote_repo_url} ${set_install_dir}" "${this_title} cloned."
@@ -330,7 +332,8 @@ if [ "$exist" -eq 0 ]; then
     print_logo
 fi
 
-if [ "$exist" -eq 1 ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
+# Update only if call made from command script
+if [ "$exist" -a "$exist" -eq 1 ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
     if cd "${set_install_dir}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
         if git fetch -q --all --prune && git pull -q; then
             cl 7 "Repo: "; cl 2 "up to date.\n"
