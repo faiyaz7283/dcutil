@@ -9,10 +9,10 @@ if [ "$(command -v ${this_name})" ]; then
     script_dir="$(basename ${set_script})"
     set_libs_dir="$(dcutil --var ${this_name}_libs)"
     set_install_dir="$(dcutil --var ${this_name}_root)"
-    exist=1
+    exist="true"
 fi
 
-if [ -z "$exist" ]; then
+if [ -z "${exist:-}" ]; then
     if (( "$#" < 2  )); then
         echo "Not enough arguments."
         exit 1
@@ -35,7 +35,7 @@ if [ -z "$exist" ]; then
         fi
 
         # Arg 3: Repo directory. (Defaults to script directory)
-        if [ "$3" ]; then
+        if [ "${3:-}" ]; then
             if [ -d "$3" ]; then
                 set_install_dir="${3%/}"
             else
@@ -322,7 +322,7 @@ EOS
 }
 
 # Business... Installation
-if [ -z "$exist" ]; then
+if [ -z "${exist:-}" ]; then
     if [ -d ${set_install_dir} -a -n "$(ls -A ${set_install_dir} 2>/dev/null)" ]; then
         cl 1 "${this_title} repo already exists in ${set_install_dir}.\n"
     else
@@ -345,7 +345,7 @@ if [ -z "$exist" ]; then
 fi
 
 # Update only if call made from command script
-if [ "$exist" -a "$exist" -eq 1 ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
+if [ "${exist:-}" -a "$exist" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
     if cd "${set_install_dir}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
         if git fetch -q --all --prune && git pull -q; then
             cl 7 "Repo: "; cl 2 "up to date.\n"
