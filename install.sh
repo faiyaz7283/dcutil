@@ -323,17 +323,27 @@ EOS
 
 # Business... Installation
 if [ -z "$exist" ]; then
-    # Adding repo
-    cl 3 "Cloning ${this_title}...\n" 1
-    if_cmd_success "git clone ${remote_repo_url} ${set_install_dir}" "${this_title} cloned."
-    cd "${set_install_dir}" && git submodule update --init --recursive
+    if [ -d ${set_install_dir} -a -n "$(ls -A ${set_install_dir} 2>/dev/null)" ]; then
+        cl 1 "${set_install_dir} already exists and is not empty."
+        exit 1
+    else
+        # Adding repo
+        cl 3 "Cloning ${this_title}...\n" 1
+        if_cmd_success "git clone ${remote_repo_url} ${set_install_dir}" "${this_title} cloned."
+        cd "${set_install_dir}" && git submodule update --init --recursive
+    fi
 
-    # Set the command script
-    cl 3 "Adding '${this_name}' command in your ${script_dir} directory.\n"
-    print_command_script > "${set_script}"
-    chmod 755 "${set_script}"
-    cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
-    print_logo
+    if [ -f "${set_script}" ]; then
+        cl 1 "${this_title} already exists."
+        exit 1
+    else
+        # Set the command script
+        cl 3 "Adding '${this_name}' command in your ${script_dir} directory.\n"
+        print_command_script > "${set_script}"
+        chmod 755 "${set_script}"
+        cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
+        print_logo
+    fi
 fi
 
 # Update only if call made from command script
