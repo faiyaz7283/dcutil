@@ -58,7 +58,7 @@ fi
 # Print messages in color
 cl() {
     tput setaf "${1}"
-    [ "${3:-}" -a "${3:-}" == "1" ] && tput bold
+    [ "${3:-}" == "1" ] && tput bold
     printf "${2}"
     tput sgr0
 }
@@ -98,7 +98,7 @@ export ${this_name}_root="${set_install_dir}"
 # Print messages in color
 cl() {
     tput setaf "\$1"
-    [ "\$3" -a "\$3" == "1" ] && tput bold
+    [ "\${3:-}" == "1" ] && tput bold
     printf "\$2"
     tput sgr0
 }
@@ -178,45 +178,45 @@ get_host_ip() {
 }
 
 if [ -d "\$${this_name}_root" ]; then
-    if [ "\$${this_name}_libs" -a -d "\$${this_name}_libs"  ]; then
+    if [ -d "\$${this_name}_libs"  ]; then
         (
             cd \${${this_name}_libs}
             [ -f ".env" ] && export \$(cat .env | grep -v ^\# | xargs)
             self_make="eval make -f \${${this_name}_root}/Makefile -I \${${this_name}_root}"
-            if [ "\$1" == "-u" -o "\$1" == "--update" ]; then
-                self_update
-            elif [  "\$1" == "--ip" ]; then
-                if get_host_ip > /dev/null 2>&1; then
-                    get_host_ip
-                fi
-            elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
-                cl 1 "Are you sure you want to remove "; cl 7 "${this_title} " 1; cl 1 "from this machine ?\n"
-                select choice in "Yes" "No"; do
-                    case \$choice in
-                        Yes ) rm -rf \${${this_name}_root} && rm -- "\${${this_name}_script}"
-                            cl 7 "${this_title} " 1; cl 6 "is now removed from this machine.\n"
-                            cl 7 "Thank you for using. Goodbye.\n"
-                            break;;
-                        No )  exit;;
-                        * ) echo "Please enter 1 for Yes or 2 for No.";;
-                    esac
-                done
-            elif [ "\$1" == "-h" -o "\$1" == "--help" -o "\$1" == "--man" ]; then
-                \${self_make} help
-            elif [ "\$1" == "-v" -o "\$1" == "--version" ]; then
-                cd \$dcutil_root
-                version=\$(git describe --always --tags)
-                sha1=\$(git rev-parse HEAD)
-                release_date=\$(git log -1 --format=%ai \$version)
-                cl 3 " DCUTIL\n" 1
-                cl 7 " - Version: "; cl 2 "\${version}\n" 1
-                cl 7 " - Released: "; cl 2 "\${release_date:0:10}\n" 1
-                cl 7 " - SHA-1: "; cl 2 "\${sha1}\n" 1
-            elif [ "\$1" == "--var" ]; then
-                [ "\$2" ] && get_var \$2
-            else
-                if [ "\$#" == 0 ]; then
+            if [ "\$#" == 0 ]; then
                     generic_info
+            else
+                if [ "\$1" == "-u" -o "\$1" == "--update" ]; then
+                    self_update
+                elif [  "\$1" == "--ip" ]; then
+                    if get_host_ip > /dev/null 2>&1; then
+                        get_host_ip
+                    fi
+                elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
+                    cl 1 "Are you sure you want to remove "; cl 7 "${this_title} " 1; cl 1 "from this machine ?\n"
+                    select choice in "Yes" "No"; do
+                        case \$choice in
+                            Yes ) rm -rf \${${this_name}_root} && rm -- "\${${this_name}_script}"
+                                cl 7 "${this_title} " 1; cl 6 "is now removed from this machine.\n"
+                                cl 7 "Thank you for using. Goodbye.\n"
+                                break;;
+                            No )  exit;;
+                            * ) echo "Please enter 1 for Yes or 2 for No.";;
+                        esac
+                    done
+                elif [ "\$1" == "-h" -o "\$1" == "--help" -o "\$1" == "--man" ]; then
+                    \${self_make} help
+                elif [ "\$1" == "-v" -o "\$1" == "--version" ]; then
+                    cd \$dcutil_root
+                    version=\$(git describe --always --tags)
+                    sha1=\$(git rev-parse HEAD)
+                    release_date=\$(git log -1 --format=%ai \$version)
+                    cl 3 " DCUTIL\n" 1
+                    cl 7 " - Version: "; cl 2 "\${version}\n" 1
+                    cl 7 " - Released: "; cl 2 "\${release_date:0:10}\n" 1
+                    cl 7 " - SHA-1: "; cl 2 "\${sha1}\n" 1
+                elif [ "\$1" == "--var" ]; then
+                    [ "\${2:-}" ] && get_var \$2
                 else
                     if [ "\$1" == "-q" -o "\$1" == "--quiet" ]; then
                         quiet=true
@@ -248,7 +248,7 @@ if [ -d "\$${this_name}_root" ]; then
             fi
         )
     else
-        cl 1 "Missing ${this_title} libs directory.\n"
+        cl 1 "${this_title} libs is not a directory.\n"
         exit 1
     fi
 else
@@ -345,7 +345,7 @@ if [ -z "${exist:-}" ]; then
 fi
 
 # Update only if call made from command script
-if [ "${exist:-}" -a "${exist:-}" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
+if [ "${exist:-}" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
     if cd "${set_install_dir}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
         if git fetch -q --all --prune && git pull -q; then
             cl 7 "Repo: "; cl 2 "up to date.\n"
