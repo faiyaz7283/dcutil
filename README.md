@@ -265,9 +265,7 @@ dcutil demo_todo migration
 To print the help manual use either the -h, --help or the --man flags.
 
 ```bash
-dcutil -h
 dcutil --help
-dcutil --man
 ```
 
 ### Update ###
@@ -276,7 +274,6 @@ Use --update or -u flags to update DCUTIL program. It will first check the remot
 accordingly. It will also update your DCUTIL command if applicable.
 
 ```bash
-dcutil -u
 dcutil --update
 ```
 
@@ -285,6 +282,5 @@ dcutil --update
 To remove DCUTIL from your machine you, run the program with --remove or -r flags.
 
 ```bash
-dcutil -r
 dcutil --remove
 ```

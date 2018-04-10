@@ -105,7 +105,7 @@ cl() {
 
 # Pass down variables to calling scripts
 get_var() {
-    var=\$1; [ "\${!var}" ] && echo \${!var}
+    var=\$1; [ "\${!var:-}" ] && echo \${!var}
 }
 
 # Update ${this_name} script
@@ -157,7 +157,7 @@ get_project_by_key() {
     projects=(\$(echo \${PROJECTS//:/ }))
 	if (( "\${1}" > 0 )); then
         project=\${projects["\$(( \${1} - 1 ))"]}
-        [ "\$project" ] && echo \$project || return 1
+        [ "\${project:-}" ] && echo \$project || return 1
     else
         return 1
     fi
@@ -239,10 +239,10 @@ if [ -d "\$${this_name}_root" ]; then
                         fi
                     fi
 
-                    if [ "\$quiet" == true ]; then
-                        \${self_make} \$project "\$@" 2>&1 >/dev/null
+                    if [ "\${quiet:-}" == true ]; then
+                        \${self_make} \${project:-} "\$@" 2>&1 >/dev/null
                     else
-                        \${self_make} \$project "\$@"
+                        \${self_make} \${project:-} "\$@"
                     fi
                 fi
             fi

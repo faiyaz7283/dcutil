@@ -1,8 +1,21 @@
-#-------------------------------------------------------------------------------------------------[ Includes ]----------
-include libs/variables.mk
-include libs/printing-functions.mk
-include libs/helper-functions.mk
-include libs/docker-functions.mk
+#------------------------------------------------------------------------------------------------[ Variables ]----------
+SHELL := /bin/bash
+dc_compose = docker-compose -f $$docker_compose_files -p $(p)
+self_make = $(MAKE) -f "$$dcutil_root/Makefile" -I "$$dcutil_root"
+silent = false
+cnt_shell= sh
+cnt_user = root
+helper_ts = show_commands commands targets show_projects projects help man rm_vars
+validation_ts = check_not_root isset_p isset_valid_p is_code_project_exist isset_env isset_valid_cf
+build_ts = build
+dc_ts = dc_start dc_start dc_stop dc_stop dc_ps dc_ps dc_up dc_up dc_up_detailed dc_down \
+			dc_down dc_login dc_login dc_cmd dc_cmd dc_workstation dc_workstation dc_images dc_images
+all_ts = $(helper_ts) $(validation_ts) $(build_ts) $(dc_ts)
+, = ,
+
+#--------------------------------------------------------------------------------------------[ Includes Vars ]----------
+include libs/printing-vars.mk
+include libs/helper-vars.mk
 
 #--------------------------------------------------------------------------------------------[ Phony targets ]----------
 .PHONY : $(all_ts)
@@ -19,7 +32,7 @@ show_commands commands targets:
 		fi; \
 	fi; \
 	$(call print_command, Build, $(build_ts)); \
-	$(call print_command, Docker, $(docker_ts)); \
+	$(call print_command, Docker, $(dc_ts)); \
 	$(call print_command, Helper, $(helper_ts))
 
 show_projects projects : isset_env
@@ -128,7 +141,7 @@ build : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call print_running_target); \
 	$(call get_dcutil_project_working_dir); \
 	$(call get_dcutil_project_docker_compose_files); \
-	$(self_make) docker_up_detailed; \
+	$(self_make) dc_up_detailed; \
 	$(self_make) prj_mgmt; \
 	$(call print_completed_target)
 
@@ -144,26 +157,8 @@ __% : check_not_root isset_valid_p isset_env
 	exit 1
 
 #-----------------------------------------------------------------------------------[ Docker-Compose targets ]----------
-# For docker_login, docker_cmd and docker_workstation use the parameters below:
-# cmd = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
-# cnt = The service container name.
-# cnt_user = The user to enter the container.
-# cnt_shell = The container shell.
-#-----------------------------------------------------------------------------------------------------------------------
-dc_% : check_not_root isset_valid_p isset_env isset_valid_cf
-	@$(call override); \
-	$(call print_running_target); \
-	$(call extract_dcfs_for_docker_compose); \
-	if grep -qr "^define $@" $$dcutil_root; then \
-		$(call $@); \
-	else \
-		$(call print_color, 1, "$@ is not defined."); \
-		$(call print_failed_target); \
-		exit 1; \
-	fi; \
-	$(call print_completed_target)
+include libs/docker-targets.mk
 
 #---------------------------------------------------------------------------[ Custom project wrapper targets ]----------
 prj_mgmt : check_not_root isset_valid_p isset_env
 	@$(call override)
-
