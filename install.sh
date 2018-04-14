@@ -3,6 +3,7 @@ set -euo pipefail
 
 this_name="dcutil"
 this_title="$(echo "${this_name}" | tr '[:lower:]' '[:upper:]')"
+man_dir=/usr/local/share/man
 remote_repo_url="https://github.com/faiyaz7283/${this_name}.git"
 if [ "$(command -v ${this_name})" ]; then
     set_script="$(dcutil --var ${this_name}_script)"
@@ -208,7 +209,7 @@ if [ -d "\$${this_name}_root" ]; then
                     cl 1 "Are you sure you want to remove "; cl 7 "${this_title} " 1; cl 1 "from this machine ?\n"
                     select choice in "Yes" "No"; do
                         case \$choice in
-                            Yes ) rm -rf \${${this_name}_root} && rm -- "\${${this_name}_script}"
+                            Yes ) rm -rf \${${this_name}_root} && rm -f ${man_dir}/man1/${this_name}.1 && rm -- "\${${this_name}_script}"
                                 cl 7 "${this_title} " 1; cl 6 "is now removed from this machine.\n"
                                 cl 7 "Thank you for using. Goodbye.\n"
                                 break;;
@@ -349,10 +350,9 @@ if [ -z "${exist:-}" ]; then
         chmod 755 "${set_script}"
 
         # If path exists and writable then add symbolic link to manual
-        man_dir=/usr/local/share/man
         if [[ "$(manpath)" == *"${man_dir}"* ]] && [ -w "${man_dir}" ]; then
             mkdir -p "${man_dir}/man1"
-            ln -s ${set_script}/share/man/man1/${this_name}.1  ${man_dir}/man1/ 2>/dev/null 1>&2
+            ln -s ${set_install_dir}/share/man/man1/${this_name}.1  ${man_dir}/man1/ 2>/dev/null 1>&2
         fi
 
         cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
