@@ -352,7 +352,7 @@ if [ -z "${exist:-}" ]; then
         man_dir=/usr/local/share/man
         if [[ "$(manpath)" == *"${man_dir}"* ]] && [ -w "${man_dir}" ]; then
             mkdir -p "${man_dir}/man1"
-            ln -s ${set_script}/share/man/man1/${this_title}.1  ${man_dir}/man1/
+            ln -s ${set_script}/share/man/man1/${this_name}.1  ${man_dir}/man1/ 2>/dev/null 1>&2
         fi
 
         cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
