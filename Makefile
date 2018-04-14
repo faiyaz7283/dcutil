@@ -5,11 +5,10 @@ self_make = $(MAKE) -f "$$dcutil_root/Makefile" -I "$$dcutil_root"
 silent = false
 cnt_shell= sh
 cnt_user = root
-helper_ts = show_commands commands targets show_projects projects help man rm_vars
+helper_ts = show_commands commands targets show_projects projects rm_vars
 validation_ts = check_not_root isset_p isset_valid_p is_code_project_exist isset_env isset_valid_cf
 build_ts = build
-dc_ts = dc_start dc_start dc_stop dc_stop dc_ps dc_ps dc_up dc_up dc_up_detailed dc_down \
-			dc_down dc_login dc_login dc_cmd dc_cmd dc_workstation dc_workstation dc_images dc_images
+dc_ts = dc_start dc_stop dc_ps dc_up dc_up_detailed dc_down dc_login dc_cmdn dc_workstation dc_images
 all_ts = $(helper_ts) $(validation_ts) $(build_ts) $(dc_ts)
 , = ,
 
@@ -32,7 +31,7 @@ show_commands commands targets:
 		fi; \
 	fi; \
 	$(call print_command, Build, $(build_ts)); \
-	$(call print_command, Docker, $(dc_ts)); \
+	$(call print_command, 'Docker Compose', $(dc_ts)); \
 	$(call print_command, Helper, $(helper_ts))
 
 show_projects projects : isset_env
@@ -46,9 +45,6 @@ show_projects projects : isset_env
 			$(call print_triple_color, 7, "$$index", 3, " => ", 2, "$${projects[$$i]}") ;  \
 		done; \
 	fi
-
-help man :
-	@$(call help)
 
 rm_vars : check_not_root isset_p isset_env
 	@$(call print_running_target); \
@@ -145,6 +141,9 @@ build : check_not_root isset_valid_p isset_env isset_valid_cf
 	$(self_make) prj_mgmt; \
 	$(call print_completed_target)
 
+#-----------------------------------------------------------------------------------[ Docker-Compose targets ]----------
+include libs/docker-targets.mk
+
 #-----------------------------------------------------------------------------------[ Custom project targets ]----------
 # Custom project targets points to the cutom project makefile. Users can call any custom targets prepending target name
 # with double underscores.
@@ -155,9 +154,6 @@ __% : check_not_root isset_valid_p isset_env
 	$(call override, $$target); \
 	$(call print_color, 1, "Cannot find target $$taclearqrget."); \
 	exit 1
-
-#-----------------------------------------------------------------------------------[ Docker-Compose targets ]----------
-include libs/docker-targets.mk
 
 #---------------------------------------------------------------------------[ Custom project wrapper targets ]----------
 prj_mgmt : check_not_root isset_valid_p isset_env

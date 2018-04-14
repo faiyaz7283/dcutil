@@ -65,3 +65,12 @@ load '../libs/bats-assert/load'
     run dcutil --update
     assert_success
 }
+
+@test "Running man dcutil displays help menu" {
+    if [ -f "/usr/local/share/man/man1/.dcutil.1" ]; then
+        run man dcutil
+        assert_success
+        assert_line --index 0 --partial "DCUTIL(1)"
+        assert_line --index 0 --partial "General Commands Manual"
+    fi
+}

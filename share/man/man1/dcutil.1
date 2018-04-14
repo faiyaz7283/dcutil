@@ -1,0 +1,89 @@
+.TH DCUTIL 1 "11 APRIL 2018" "" "General Commands Manual"
+.SH NAME
+.B dcutil
+\-- A docker-compose utility for developers
+.SH SYNOPSIS
+.B dcutil
+[options] [parameters]
+.I <target>...
+.SH DESCRIPTION
+The
+.B dcutil
+is an utility program written in conjunction with Bash and Make. The main objective of
+.B dcutil
+is to setup an organic workflow for project operations running on Docker containers. The name
+.B dcutil
+is short for docker compose utility. Docker-compose is a great tool to automate and build services, and
+.B dcutil
+adds some utility tasks to make running projects with docker-compose a little bit easier.
+.SH OPTIONS
+An option
+.B MUST
+be set as the first argument. The option
+.B -q --quiet
+can be preceded by parameters and target. All other options are just stand alone and cannot be combined.
+.TP
+.B "-u --update"
+Check and run update for
+.B dcutil.
+.TP
+.B "-r --remove"
+Uninstall
+.B dcutil
+from the machine.
+.TP
+.B --ip
+Print the machine's private IP.
+.TP
+.B "-v --version"
+Print the version info.
+.TP
+.B "-q --quiet"
+Run
+.B dcutil
+in silent mode. Redirects all stdout and stderr to /dev/null.
+.TP
+.B --var
+This option can be used to get the value for
+.B dcutil_script_dir, dcutil_script, dcutil_libs
+and
+.B dcutil_root.
+(mostly for internal use)
+.SH PARAMETERS
+Parameters are basically variables passed onto the
+.B dcutil
+Makefile. They can be set before or after the target. There is one required parameter to run the dcutil program
+.B -p.
+The
+.B -p
+parameter tells
+.B dcutil
+which project to run the targets on. There's also 2 more ways to set the project, by using the
+project key number or simply writing the project name. However, these shortcuts can only be used if provided as the
+first argument, otherwise it will not work as intended.
+.SH TARGETS
+Any defined make targets from the default
+.B dcutil
+Makefile, or user defined custom makefile(s). Only one target per command can be used. To find all the available
+.B dcutil
+targets take a look at the Makefile in your dcutil folder. There is also a helper target called
+.B targets
+to retrieve all the available targets. It generally will display only the targets listed on the dcutil/Makefile, however
+you can also list project specific targets if you run the target with a project parameter. Keep in mind, for the project
+specific targets to be available, the custom makefile must be setup with a
+.B list_ts
+target which prints all targets delimited by space.
+.TP
+Get all available native targets:
+.B dcutil targets
+.TP
+Get all available native targets plus project <prjct1> targets:
+.B dcutil p=prjct1 targets
+.SH USAGES
+usage details go here
+.SH BUGS
+Please report all bugs at https://github.com/faiyaz7283/dcutil/issues.
+.SH AUTHOR
+Faiyaz Haider <faiyaz7283@gmail.com>
+.SH "SEE ALSO"
+.BR "make" "(1), " "bash" "(1), " "docker-compose" " --help "

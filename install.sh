@@ -177,6 +177,17 @@ get_host_ip() {
 	fi
 }
 
+get_version() {
+    cd \$dcutil_root
+    version=\$(git describe --always --tags)
+    sha1=\$(git rev-parse HEAD)
+    release_date=\$(git log -1 --format=%ai \$version)
+    cl 3 " DCUTIL\n" 1
+    cl 7 " Version: " 1; cl 2 "\${version}\n" 1
+    cl 7 " Released: " 1; cl 2 "\${release_date:0:10}\n" 1
+    cl 7 " SHA-1: " 1; cl 2 "\${sha1}\n" 1
+}
+
 if [ -d "\$${this_name}_root" ]; then
     if [ -d "\$${this_name}_libs"  ]; then
         (
@@ -186,13 +197,14 @@ if [ -d "\$${this_name}_root" ]; then
             if [ "\$#" == 0 ]; then
                     generic_info
             else
-                if [ "\$1" == "-u" -o "\$1" == "--update" ]; then
+                arg1=\${1:-}
+                if [ "\$arg1" == "-u" -o "\$arg1" == "--update" ]; then
                     self_update
-                elif [  "\$1" == "--ip" ]; then
+                elif [  "\$arg1" == "--ip" ]; then
                     if get_host_ip > /dev/null 2>&1; then
                         get_host_ip
                     fi
-                elif [ "\$1" == "-r" -o "\$1" == "--remove" ]; then
+                elif [ "\$arg1" == "-r" -o "\$arg1" == "--remove" ]; then
                     cl 1 "Are you sure you want to remove "; cl 7 "${this_title} " 1; cl 1 "from this machine ?\n"
                     select choice in "Yes" "No"; do
                         case \$choice in
@@ -204,37 +216,31 @@ if [ -d "\$${this_name}_root" ]; then
                             * ) echo "Please enter 1 for Yes or 2 for No.";;
                         esac
                     done
-                elif [ "\$1" == "-h" -o "\$1" == "--help" -o "\$1" == "--man" ]; then
-                    \${self_make} help
-                elif [ "\$1" == "-v" -o "\$1" == "--version" ]; then
-                    cd \$dcutil_root
-                    version=\$(git describe --always --tags)
-                    sha1=\$(git rev-parse HEAD)
-                    release_date=\$(git log -1 --format=%ai \$version)
-                    cl 3 " DCUTIL\n" 1
-                    cl 7 " - Version: "; cl 2 "\${version}\n" 1
-                    cl 7 " - Released: "; cl 2 "\${release_date:0:10}\n" 1
-                    cl 7 " - SHA-1: "; cl 2 "\${sha1}\n" 1
-                elif [ "\$1" == "--var" ]; then
+                elif [ "\$arg1" == "-h" -o "\$arg1" == "--help" -o "\$arg1" == "--man" ]; then
+                    man "\${${this_name}_root}/share/man/man1/dcutil.1"
+                elif [ "\$arg1" == "-v" -o "\$arg1" == "--version" ]; then
+                    get_version
+                elif [ "\$arg1" == "--var" ]; then
                     [ "\${2:-}" ] && get_var \$2
                 else
-                    if [ "\$1" == "-q" -o "\$1" == "--quiet" ]; then
+                    if [ "\$arg1" == "-q" -o "\$arg1" == "--quiet" ]; then
                         quiet=true
                         shift
+                        arg1=\$1
                     fi
 
                     pattern='^[0-9]+\$'
-                    if [[ \$1 =~ \$pattern ]]; then
-                        if get_project_by_key \$1 2>/dev/null 1>&2; then
-                            project="p=\$(get_project_by_key \$1)"
+                    if [[ \$arg1 =~ \$pattern ]]; then
+                        if get_project_by_key \$arg1 2>/dev/null 1>&2; then
+                            project="p=\$(get_project_by_key \$arg1)"
                             shift
                         else
-                            cl 1 "Invalid key \$1\n"
+                            cl 1 "Invalid key \$arg1\n"
                             exit 1
                         fi
-                    elif [[ ! \$1 =~ "=" ]]; then
-                        if project_exists \$1 || (( "\$#" > 1 )); then
-                            project="p=\$1"
+                    elif [[ ! \$arg1 =~ "=" ]]; then
+                        if project_exists \$arg1 || (( "\$#" > 1 )); then
+                            project="p=\$arg1"
                             shift
                         fi
                     fi
@@ -323,6 +329,7 @@ EOS
 
 # Business... Installation
 if [ -z "${exist:-}" ]; then
+    # Repo...
     if [ -d ${set_install_dir} -a -n "$(ls -A ${set_install_dir} 2>/dev/null)" ]; then
         cl 1 "${this_title} repo already exists in ${set_install_dir}.\n"
     else
@@ -332,6 +339,7 @@ if [ -z "${exist:-}" ]; then
         cd "${set_install_dir}" && git submodule update --init --recursive
     fi
 
+    # Command script...
     if [ -f "${set_script}" ]; then
         cl 1 "${this_title} command script already exists in ${script_dir}.\n"
     else
@@ -339,6 +347,12 @@ if [ -z "${exist:-}" ]; then
         cl 3 "Adding '${this_name}' command in your ${script_dir} directory.\n"
         print_command_script > "${set_script}"
         chmod 755 "${set_script}"
+
+        if [ -d "/usr/local/share" ]; then
+            man_dir="/usr/local/share/man/man1"
+            mkdir -p "${man_dir}"
+            ln -s ${set_script}/share/man/man1/${this_title}.1  ${man_dir}
+        fi
         cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
         print_logo
     fi
@@ -346,6 +360,7 @@ fi
 
 # Update only if call made from command script
 if [ "${exist:-}" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]]; then
+
     if cd "${set_install_dir}" 2>/dev/null 1>&2 && git rev-parse --git-dir 2>/dev/null 1>&2 && git ls-remote -h ${remote_repo_url} 2>/dev/null 1>&2; then
         if git fetch -q --all --prune && git pull -q; then
             cl 7 "Repo: "; cl 2 "up to date.\n"
