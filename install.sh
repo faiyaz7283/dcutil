@@ -349,10 +349,10 @@ if [ -z "${exist:-}" ]; then
         chmod 755 "${set_script}"
 
         # If path exists and writable then add symbolic link to manual
-        if [[ "$(manpath)" == *"/usr/local/share/man"* ]] && [ -w "/usr/local/share/man" ]; then
-            man_dir="/usr/local/share/man/man1"
-            mkdir -p "${man_dir}"
-            ln -s ${set_script}/share/man/man1/${this_title}.1  ${man_dir}
+        man_dir=/usr/local/share/man
+        if [[ "$(manpath)" == *"${man_dir}"* ]] && [ -w "${man_dir}" ]; then
+            mkdir -p "${man_dir}/man1"
+            ln -s ${set_script}/share/man/man1/${this_title}.1  ${man_dir}/man1/
         fi
 
         cl 2 "Done. Make sure "; cl 7 "${script_dir} " 1; cl 2 "is in your PATH.\n\n"
