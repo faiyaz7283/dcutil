@@ -1,11 +1,19 @@
 #-----------------------------------------------------------------------------------[ Docker-Compose targets ]----------
 # For dc_login, dc_cmd and dc_workstation use the parameters below:
-# cmd = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
+# args = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
 # cnt = The service container name.
 # cnt_user = The user to enter the container.
 # cnt_shell = The container shell.
 #-----------------------------------------------------------------------------------------------------------------------
 dc_start_wrap = $(call override); $(call print_running_target); $(call extract_dcfs_for_docker_compose)
+
+dc_% :
+	@dc_cmd=$@; \
+	dc_cmd=$${dc_cmd#dc_}; \
+	$(call dc_start_wrap); \
+	echo "$(dc_compose) $$dc_cmd $$args"; \
+	$(dc_compose) $$dc_cmd $$args; \
+	$(call print_completed_target)
 
 # Start docker containers from docker compose file.
 dc_start :
@@ -24,29 +32,31 @@ dc_stop :
 # Check projects docker containers statuses
 dc_ps :
 	 @$(call dc_start_wrap); \
-	 $(dc_compose) ps; \
+	 if [ $$args ]; then \
+		$(dc_compose) ps $$args; \
+	 else \
+	 	$(dc_compose) ps; \
+	 fi; \
 	 $(call print_completed_target)
 
 
-# Bring up docker containers.
+# Bring up docker containers and prints out detailed info bout current cnts status and comeplete execution time
 dc_up :
 	@$(call dc_start_wrap); \
-	$(dc_compose) up -d --build; \
-    $(call print_completed_target)
-
-
-# Bring up docker containers and prints out detailed info bout current cnts status and comeplete execution time
-dc_up_detailed :
-	@$(call dc_start_wrap); \
-	/usr/bin/time -p $(self_make) dc_up; \
-	printf "\n"; $(self_make) dc_ps; printf "\n"; \
+	if [ $$args ]; then \
+		$(dc_compose) up $$args; \
+	else \
+		/usr/bin/time -p $(dc_compose) up -d --build; \
+		printf "\n"; $(self_make) dc_ps; printf "\n"; \
+	fi; \
 	$(call print_completed_target)
 
 
 # Bring down docker containers.
 dc_down :
 	@$(call dc_start_wrap); \
-	$(dc_compose) down --remove-orphans; \
+	[ -z $$args ] args=--remove-orphans
+	$(dc_compose) down $$args; \
 	$(call print_completed_target)
 
 

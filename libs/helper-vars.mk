@@ -71,7 +71,7 @@ define override
 	target=$${target:-$@}; \
 	$(call get_custom_project_makefile); \
 	dirname=$$(dirname $${pmf}); \
- 	if [ -f "$${pmf}" ] && grep -qr "^$${target}\s*:" $$dirname; then \
+ 	if [ -f "$${pmf}" ] && grep -qr "^$${target}\s*:" $$dcutil_libs; then \
  		makefilename="$$(basename $${pmf})"; \
  		$(call print_running_target, '$${makefilename} » $$target'); \
  		$(MAKE) -f $${pmf} -I $$dirname $$target; \

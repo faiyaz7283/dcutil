@@ -246,10 +246,13 @@ if [ -d "\$${this_name}_root" ]; then
                         fi
                     fi
 
+                    make_target=\${1:-}
+                    [[ \$make_target == "dc_"* ]] && args="args='\${@:2}'"
+
                     if [ "\${quiet:-}" == true ]; then
-                        \${self_make} \${project:-} "\$@" 2>&1 >/dev/null
+                        \${self_make} \${project:-} \$make_target \${args:-} 2>&1 >/dev/null
                     else
-                        \${self_make} \${project:-} "\$@"
+                        \${self_make} \${project:-} \$make_target \${args:-}
                     fi
                 fi
             fi
@@ -349,7 +352,7 @@ if [ -z "${exist:-}" ]; then
         print_command_script > "${set_script}"
         chmod 755 "${set_script}"
 
-        # If path exists and writable then add symbolic link to manual
+        # If path exists and writable then add symbolic link for manual
         if [[ "$(manpath)" == *"${man_dir}"* ]] && [ -w "${man_dir}" ]; then
             mkdir -p "${man_dir}/man1"
             ln -s ${set_install_dir}/share/man/man1/${this_name}.1  ${man_dir}/man1/ 2>/dev/null 1>&2
