@@ -140,7 +140,7 @@ set_${this_name}_location() {
     if [ -d "\$1" ]; then
         cd \$1
         if git rev-parse --git-dir 2>/dev/null 1>&2; then
-            find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\'\\"].+[\\'\\"]\\$" \${${this_name}_script})
+            find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\'\\"](.+)?[\\'\\"]\\$" \${${this_name}_script})
             sed -i.bak -e "s#\$find#export ${this_name}_root=\\"\${1%/}\\"#" \${${this_name}_script} && rm -f \${${this_name}_script}.bak
         fi
     fi
@@ -148,7 +148,7 @@ set_${this_name}_location() {
 
 set_${this_name}_lib_location() {
     if [ -d "\$1" ]; then
-        find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\'\\"].+[\\'\\"]\\$" \${${this_name}_script})
+        find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\'\\"](.+)?[\\'\\"]\\$" \${${this_name}_script})
         sed -i.bak -e "s#\$find#export ${this_name}_libs=\\"\${1%/}\\"#" \${${this_name}_script} && rm -f \${${this_name}_script}.bak
     fi
 }
