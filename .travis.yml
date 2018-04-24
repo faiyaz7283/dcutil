@@ -6,9 +6,11 @@ before_install:
   - dcutil_program_installation_dir=/tmp/local/bin
   - mkdir -p $dcutil_program_installation_dir
   - export PATH=$PATH:$dcutil_program_installation_dir
-  - dcutil_dir="$(dirname $(pwd))"
+  - cp -R dcutil/dcutil-libs-example ./dcutil-libs
+  - cp dcutil/.env.example ./dcutil-libs/.env
+  - dcutil_libs="$(dirname $(pwd))/dcutil-libs"
   - mv ${dcutil_dir}/dcutil ${dcutil_program_installation_dir}/.dcutil
-  - ./install.sh $dcutil_program_installation_dir $dcutil_dir
+  - ./install.sh $dcutil_program_installation_dir $dcutil_dir $dcutil_libs
   - source ~/.bashrc && source ~/.bash_profile
 
 script:
