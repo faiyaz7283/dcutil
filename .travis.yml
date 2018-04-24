@@ -11,7 +11,8 @@ before_install:
   - cp "${dcutil_dir}/dcutil/.env.example" "${dcutil_dir}/dcutil-libs/.env"
   - dcutil_libs="${dcutil_dir}/dcutil-libs"
   - mv ${dcutil_dir}/dcutil ${dcutil_program_installation_dir}/.dcutil
-  - ./install.sh $dcutil_program_installation_dir $dcutil_dir $dcutil_libs
+  - cd ${dcutil_program_installation_dir}/.dcutil
+  - ./install.sh $dcutil_program_installation_dir $dcutil_libs
   - source ~/.bashrc && source ~/.bash_profile
 
 script:
