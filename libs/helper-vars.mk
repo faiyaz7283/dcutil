@@ -96,7 +96,7 @@ define get_dcutil_project_working_dir
 	fi
 endef
 
-# Get this project's docker compose file or return error
+# Get this project's docker compose file
 define get_dcutil_project_docker_compose_files
 	pld=$$dcutil_libs; \
 	dcfs_dir="$${pld}/docker-compose"; \

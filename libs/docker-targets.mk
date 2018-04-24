@@ -41,7 +41,7 @@ dc_ps :
 
 
 # Bring up docker containers and prints out detailed info bout current cnts status and comeplete execution time
-dc_up :
+dc_up : dc_up_dependencies
 	@$(call dc_start_wrap); \
 	if [ $$args ]; then \
 		$(dc_compose) up $$args; \
@@ -51,11 +51,30 @@ dc_up :
 	fi; \
 	$(call print_completed_target)
 
+# Bring up the external dependencies
+dc_up_dependencies :
+	@$(call override); \
+	$(call print_running_target); \
+	$(call to_upper, project_dependencies_var, $(p)_SERVICE_DEPENDENCIES); \
+	dependencies=($$(echo $${!project_dependencies_var//:/ })); \
+	for i in "$${dependencies[@]}"; do \
+		items=($$(echo $${i//|/ })); \
+		project=$${items[0]}; \
+		services=$${items[@]:1}; \
+		dcfile=$${dcutil_libs}/docker-compose/$${project}.yml; \
+		$(call check_dcutil_project_exist, $$project); \
+		if [ -f "$$dcfile" -a "$$exist" == "true" ]; then \
+			$(call print_target_info, "Running docker-compose up on project \"$${project}\" with service(s): $${services[@]}"); \
+			docker-compose -f $${dcfile} -p $${project} up -d --build $${services[@]}; \
+		fi; \
+	done; \
+	$(call print_completed_target)
+
 
 # Bring down docker containers.
 dc_down :
 	@$(call dc_start_wrap); \
-	[ -z $$args ] args=--remove-orphans
+	[ -z "$$args" ] && args="--remove-orphans"; \
 	$(dc_compose) down $$args; \
 	$(call print_completed_target)
 
