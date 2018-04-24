@@ -194,85 +194,84 @@ get_version() {
 }
 
 if [ -d "\$${this_name}_root" ]; then
-    if [ "\${1:-}" == "--set-libs" ]; then
-        if [ -d "\${2:-}" -a -f "\${2:-}/.env" -a -d "\${2:-}/docker-compose" ]; then
-            set_dcutil_lib_location \$2
-        else
-            cl 1 "Argument 2 must be a valid dcutil libs directory.\n"
-            cl 7 "A valid dcutil libs dir must contain an .env file and a docker-compose folder.\n"
-            exit 1
-        fi
-    elif [ -d "\$${this_name}_libs" -a -f "\$${this_name}_libs/.env" -a -d "\$${this_name}_libs/docker-compose" ]; then
-        (
-            cd \${${this_name}_libs}
-            [ -f ".env" ] && export \$(cat .env | grep -v ^\# | xargs)
-            self_make="eval make -f \${${this_name}_root}/Makefile -I \${${this_name}_root}"
-            if [ "\$#" == 0 ]; then
-                generic_info
+    if [ "\$#" == 0 ]; then
+        generic_info
+    else
+        arg1=\${1:-}
+        if [ "\$arg1" == "-u" -o "\$arg1" == "--update" ]; then
+            self_update
+        elif [  "\$arg1" == "--ip" ]; then
+            if get_host_ip > /dev/null 2>&1; then
+                get_host_ip
+            fi
+        elif [ "\$arg1" == "-r" -o "\$arg1" == "--remove" ]; then
+            cl 1 "Are you sure you want to remove "; cl 7 "${this_title} " 1; cl 1 "from this machine ?\n"
+            select choice in "Yes" "No"; do
+                case \$choice in
+                    Yes ) rm -rf \${${this_name}_root} && rm -f ${man_dir}/man1/${this_name}.1 && rm -- "\${${this_name}_script}"
+                        cl 7 "${this_title} " 1; cl 6 "is now removed from this machine.\n"
+                        cl 7 "Thank you for using. Goodbye.\n"
+                        break;;
+                    No )  exit;;
+                    * ) echo "Please enter 1 for Yes or 2 for No.";;
+                esac
+            done
+        elif [ "\$arg1" == "-h" -o "\$arg1" == "--help" -o "\$arg1" == "--man" ]; then
+            man "\${${this_name}_root}/share/man/man1/dcutil.1"
+        elif [ "\$arg1" == "-v" -o "\$arg1" == "--version" ]; then
+            get_version
+        elif [ "\$arg1" == "--var" ]; then
+            [ "\${2:-}" ] && get_var \$2
+        elif [ "\$arg1" == "--set-libs" ]; then
+            if [ -d "\${2:-}" -a -f "\${2:-}/.env" -a -d "\${2:-}/docker-compose" ]; then
+                set_dcutil_lib_location \$2
             else
-                arg1=\${1:-}
-                if [ "\$arg1" == "-u" -o "\$arg1" == "--update" ]; then
-                    self_update
-                elif [  "\$arg1" == "--ip" ]; then
-                    if get_host_ip > /dev/null 2>&1; then
-                        get_host_ip
-                    fi
-                elif [ "\$arg1" == "-r" -o "\$arg1" == "--remove" ]; then
-                    cl 1 "Are you sure you want to remove "; cl 7 "${this_title} " 1; cl 1 "from this machine ?\n"
-                    select choice in "Yes" "No"; do
-                        case \$choice in
-                            Yes ) rm -rf \${${this_name}_root} && rm -f ${man_dir}/man1/${this_name}.1 && rm -- "\${${this_name}_script}"
-                                cl 7 "${this_title} " 1; cl 6 "is now removed from this machine.\n"
-                                cl 7 "Thank you for using. Goodbye.\n"
-                                break;;
-                            No )  exit;;
-                            * ) echo "Please enter 1 for Yes or 2 for No.";;
-                        esac
-                    done
-                elif [ "\$arg1" == "-h" -o "\$arg1" == "--help" -o "\$arg1" == "--man" ]; then
-                    man "\${${this_name}_root}/share/man/man1/dcutil.1"
-                elif [ "\$arg1" == "-v" -o "\$arg1" == "--version" ]; then
-                    get_version
-                elif [ "\$arg1" == "--var" ]; then
-                    [ "\${2:-}" ] && get_var \$2
-                else
-                    if [ "\$arg1" == "-q" -o "\$arg1" == "--quiet" ]; then
-                        quiet=true
+                cl 1 "Argument 2 must be a valid dcutil libs directory.\n"
+                cl 7 "A valid dcutil libs dir must contain an .env file and a docker-compose folder.\n"
+                exit 1
+            fi
+        elif [ -d "\$${this_name}_libs" -a -f "\$${this_name}_libs/.env" -a -d "\$${this_name}_libs/docker-compose" ]; then
+            (
+                cd \${${this_name}_libs}
+                [ -f ".env" ] && export \$(cat .env | grep -v ^\# | xargs)
+                self_make="eval make -f \${${this_name}_root}/Makefile -I \${${this_name}_root}"
+
+                if [ "\$arg1" == "-q" -o "\$arg1" == "--quiet" ]; then
+                    quiet=true
+                    shift
+                    arg1=\$1
+                fi
+
+                pattern='^[0-9]+\$'
+                if [[ \$arg1 =~ \$pattern ]]; then
+                    if get_project_by_key \$arg1 2>/dev/null 1>&2; then
+                        project="p=\$(get_project_by_key \$arg1)"
                         shift
-                        arg1=\$1
-                    fi
-
-                    pattern='^[0-9]+\$'
-                    if [[ \$arg1 =~ \$pattern ]]; then
-                        if get_project_by_key \$arg1 2>/dev/null 1>&2; then
-                            project="p=\$(get_project_by_key \$arg1)"
-                            shift
-                        else
-                            cl 1 "Invalid key \$arg1\n"
-                            exit 1
-                        fi
-                    elif [[ ! \$arg1 =~ "=" ]]; then
-                        if project_exists \$arg1 || (( "\$#" > 1 )); then
-                            project="p=\$arg1"
-                            shift
-                        fi
-                    fi
-
-                    make_target=\${1:-}
-                    [[ \$make_target == "dc_"* ]] && args="args='\${@:2}'"
-
-                    if [ "\${quiet:-}" == true ]; then
-                        \${self_make} \${project:-} \$make_target \${args:-} 2>&1 >/dev/null
                     else
-                        \${self_make} \${project:-} \$make_target \${args:-}
+                        cl 1 "Invalid key \$arg1\n"
+                        exit 1
+                    fi
+                elif [[ ! \$arg1 =~ "=" ]]; then
+                    if project_exists \$arg1 || (( "\$#" > 1 )); then
+                        project="p=\$arg1"
+                        shift
                     fi
                 fi
-            fi
-        )
-    else
-        cl 1 "Current set libs directory is not a valid dcutil libs directory.\n"
-        cl 7 "Please use dcutil --set-libs <dcutil-libs-dir-name> to set a correct libs dir first.\n"
-        exit 1
+
+                make_target=\${1:-}
+                [[ \$make_target == "dc_"* ]] && args="args='\${@:2}'"
+
+                if [ "\${quiet:-}" == true ]; then
+                    \${self_make} \${project:-} \$make_target \${args:-} 2>&1 >/dev/null
+                else
+                    \${self_make} \${project:-} \$make_target \${args:-}
+                fi
+            )
+        else
+            cl 1 "Current set libs directory is not a valid dcutil libs directory.\n"
+            cl 7 "Please use dcutil --set-libs <dcutil-libs-dir-name> to set a correct libs dir first.\n"
+            exit 1
+        fi
     fi
 else
     cl 1 "${this_title} project could not be located\n"
