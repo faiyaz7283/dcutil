@@ -14,7 +14,7 @@ if [ "$(command -v ${this_name})" ]; then
 fi
 
 if [ -z "${exist:-}" ]; then
-    if (( "$#" < 2  )); then
+    if (( "$#" < 1 )); then
         echo "Not enough arguments."
         exit 1
     else
@@ -28,11 +28,15 @@ if [ -z "${exist:-}" ]; then
         fi
 
         # Arg 2: Libs directory
-        if [ -d "$2" ]; then
-            set_libs_dir="${2%/}"
+        if [ "${2:-}" ]; then
+            if [ -d "$2" -a -f "${2:-}/.env" -a -d "${2:-}/docker-compose" ]; then
+                set_libs_dir="${2%/}"
+            else
+                echo "Argument 2 must be a valid directory."
+                exit 1
+            fi
         else
-            echo "Argument 2 must be a valid directory."
-            exit 1
+            set_libs_dir=""
         fi
 
         # Arg 3: Repo directory. (Defaults to script directory)
@@ -136,16 +140,16 @@ set_${this_name}_location() {
     if [ -d "\$1" ]; then
         cd \$1
         if git rev-parse --git-dir 2>/dev/null 1>&2; then
-            find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+\$" \${${this_name}_script})
-            sed -i.bak -e "s#\$find#export ${this_name}_root=\\"\$1\\"#" \${${this_name}_script} && rm -f \${${this_name}_script}.bak
+            find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\'\\"].+[\\'\\"]\\$" \${${this_name}_script})
+            sed -i.bak -e "s#\$find#export ${this_name}_root=\\"\${1%/}\\"#" \${${this_name}_script} && rm -f \${${this_name}_script}.bak
         fi
     fi
 }
 
 set_${this_name}_lib_location() {
     if [ -d "\$1" ]; then
-        find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\w\\d\\'\\"]+" \${${this_name}_script})
-        sed -i.bak -e "s#\$find#export ${this_name}_libs=\\"\$1\\"#" \${${this_name}_script} && rm -f \${${this_name}_script}.bak
+        find=\$(grep -E -o -m 1 -e "^export ${this_name}_libs=[\\'\\"].+[\\'\\"]\\$" \${${this_name}_script})
+        sed -i.bak -e "s#\$find#export ${this_name}_libs=\\"\${1%/}\\"#" \${${this_name}_script} && rm -f \${${this_name}_script}.bak
     fi
 }
 
@@ -190,13 +194,21 @@ get_version() {
 }
 
 if [ -d "\$${this_name}_root" ]; then
-    if [ -d "\$${this_name}_libs"  ]; then
+    if [ "\${1:-}" == "--set-libs" ]; then
+        if [ -d "\${2:-}" -a -f "\${2:-}/.env" -a -d "\${2:-}/docker-compose" ]; then
+            set_dcutil_lib_location \$2
+        else
+            cl 1 "Argument 2 must be a valid dcutil libs directory.\n"
+            cl 7 "A valid dcutil libs dir must contain an .env file and a docker-compose folder.\n"
+            exit 1
+        fi
+    elif [ -d "\$${this_name}_libs" -a -f "\$${this_name}_libs/.env" -a -d "\$${this_name}_libs/docker-compose" ]; then
         (
             cd \${${this_name}_libs}
             [ -f ".env" ] && export \$(cat .env | grep -v ^\# | xargs)
             self_make="eval make -f \${${this_name}_root}/Makefile -I \${${this_name}_root}"
             if [ "\$#" == 0 ]; then
-                    generic_info
+                generic_info
             else
                 arg1=\${1:-}
                 if [ "\$arg1" == "-u" -o "\$arg1" == "--update" ]; then
@@ -258,7 +270,8 @@ if [ -d "\$${this_name}_root" ]; then
             fi
         )
     else
-        cl 1 "${this_title} libs is not a directory.\n"
+        cl 1 "Current set libs directory is not a valid dcutil libs directory.\n"
+        cl 7 "Please use dcutil --set-libs <dcutil-libs-dir-name> to set a correct libs dir first.\n"
         exit 1
     fi
 else
