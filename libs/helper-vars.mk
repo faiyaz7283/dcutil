@@ -71,11 +71,8 @@ define override
 	target=$${target:-$@}; \
 	$(call get_custom_project_makefile); \
 	dirname=$$(dirname $${pmf}); \
- 	if [ -f "$${pmf}" ] && grep -qr "^$${target}\s*:" $$dcutil_libs; then \
- 		makefilename="$$(basename $${pmf})"; \
- 		$(call print_running_target, '$${makefilename} » $$target'); \
- 		$(MAKE) -f $${pmf} -I $$dirname $$target; \
- 		$(call print_completed_target, '$${makefilename} » $$target'); \
+ 	if [ -f "$${pmf}" ] && grep -Eqr ".*$${target}.*:.*" $${pmf}; then \
+ 		$(MAKE) -f $${pmf} -I $${dirname} "$${target}"; \
  		exit 0; \
  	fi
 endef
@@ -140,6 +137,18 @@ define get_dcutil_projects
 	projects=($$(echo $${PROJECTS//:/ }))
 endef
 
+# Get all available code projects in an array
+define get_code_projects
+	echo "Inside code projects"; \
+	echo $(code_project); \
+	$(call to_upper, code_projects, $(p)_PROJECTS); \
+	if [ "$${!code_projects}" ]; then \
+		code_projects=($$(echo $${!code_projects//:/ })); \
+	else \
+		code_projects=($(p)); \
+	fi
+endef
+
 # Check if the given project name exist
 define check_dcutil_project_exist
 	$(call get_dcutil_projects); \
@@ -187,4 +196,19 @@ define is_valid_project_name
 	$(call trim, project_name, $(1)); \
 	pattern=" |-"; \
     [[ $$project_name =~ $$pattern ]] && valid=false || valid=true
+endef
+
+# Check if the given code project exist
+define is_code_project_exist
+	$(call get_dcutil_project_working_dir); \
+	$(call trim, code_project_dir, $(1)); \
+	if [ -d "$$code_project_dir" ]; then \
+		if [ ! "$$(ls -A $$code_project_dir)" ]; then \
+			empty="true"; \
+			exist="true"; \
+		fi; \
+		exist="true"; \
+	else \
+		exist="false"; \
+	fi
 endef

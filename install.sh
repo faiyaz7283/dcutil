@@ -160,8 +160,8 @@ project_exists() {
 
 get_project_by_key() {
     projects=(\$(echo \${PROJECTS//:/ }))
-	if (( "\${1}" > 0 )); then
-        project=\${projects["\$(( \${1} - 1 ))"]}
+	if (( "\${1:-}" > 0 )); then
+        project=\${projects["\$(( \${1:-} - 1 ))"]}
         [ "\${project:-}" ] && echo \$project || return 1
     else
         return 1
@@ -232,8 +232,8 @@ if [ -d "\$${this_name}_root" ]; then
             fi
         elif [ -d "\$${this_name}_libs" -a -f "\$${this_name}_libs/.env" -a -d "\$${this_name}_libs/docker-compose" ]; then
             (
-                cd \${${this_name}_libs}
-                [ -f ".env" ] && export \$(cat .env | grep -v ^\# | xargs)
+                cd \${${this_name}_libs}/docker-compose
+                [ -f "\${${this_name}_libs}/.env" ] && export \$(cat "\${${this_name}_libs}/.env" | grep -v ^\# | xargs)
                 self_make="eval make -f \${${this_name}_root}/Makefile -I \${${this_name}_root}"
 
                 if [ "\$arg1" == "-q" -o "\$arg1" == "--quiet" ]; then
@@ -242,29 +242,78 @@ if [ -d "\$${this_name}_root" ]; then
                     arg1=\$1
                 fi
 
-                pattern='^[0-9]+\$'
-                if [[ \$arg1 =~ \$pattern ]]; then
-                    if get_project_by_key \$arg1 2>/dev/null 1>&2; then
-                        project="p=\$(get_project_by_key \$arg1)"
+                one_project_num='^[0-9]+\$'
+                one_project_name='^p='
+                some_project_nums='^[0-9]+[0-9:]+[0-9]\$'
+                all_projects='^(--all|-a)\$'
+                if [[ \$arg1 =~ \$one_project_num ]]; then
+                    num="true"
+                    projects=("\$arg1")
+                    shift
+                elif [[ \$arg1 =~ \$some_project_nums ]]; then
+                    num="true"
+                    projects=(\$(echo \${arg1//:/ }))
+                    shift
+                elif [[ \$arg1 =~ \$one_project_name ]]; then
+                    num="false"
+                    arg1=\${arg1#p=}
+                    projects=("\$arg1")
+                    shift
+                elif [[ \$arg1 =~ \$all_projects ]]; then
+                    num="false"
+                    projects=(\$(echo \${PROJECTS//:/ }))
+                    shift
+                else
+                    num="false"
+                    if project_exists \$arg1 || (( "\$#" > 1 )); then
+                        projects=("\$arg1")
                         shift
                     else
-                        cl 1 "Invalid key \$arg1\n"
-                        exit 1
-                    fi
-                elif [[ ! \$arg1 =~ "=" ]]; then
-                    if project_exists \$arg1 || (( "\$#" > 1 )); then
-                        project="p=\$arg1"
-                        shift
+                        projects="false"
                     fi
                 fi
 
-                make_target=\${1:-}
-                [[ \$make_target == "dc_"* ]] && args="args='\${@:2}'"
+                first_arg="\${1:-}"
+                other_args="\${@:2}"
 
-                if [ "\${quiet:-}" == true ]; then
-                    \${self_make} \${project:-} \$make_target \${args:-} 2>&1 >/dev/null
+                if [[ \$first_arg == "dc_"* ]]; then
+                    pattern="(login|cmd)"
+                    [[ ! \$first_arg =~ \$pattern ]] && other_args="args='\${@:2}'"
+                fi
+
+                if [ "\$projects" != "false" ]; then
+                    total_projects="\${#projects[@]}"
+                    (( "\$total_projects" > 1 )) && total_break=\$((\$total_projects - 1)) || total_break=0
+                    for i in "\${!projects[@]}"; do
+                        if [ "\$num" == "true" ]; then
+                            if \$(get_project_by_key \${projects[\$i]} 2>/dev/null 1>&2); then
+                                title="\$(get_project_by_key \${projects[\$i]})"
+                                project="p=\${title}"
+                            else
+                                cl 1 "Invalid key \${projects[\$i]}\n"
+                                exit 1
+                            fi
+                        else
+                            title=\${projects[\$i]}
+                            project="p=\${title}"
+                        fi
+
+                        if (( "\$total_break" >= "\$i" )); then
+                            cl 8 "\n----------------[ " 1; cl 3 "\${title}"; cl 8 " ]----------------\n" 1
+                        fi
+
+                        if [ "\${quiet:-}" == true ]; then
+                            \${self_make} "\${project}" "\$first_arg" " \${other_args:-}" 2>&1 >/dev/null
+                        else
+                            \${self_make} "\${project}" "\$first_arg" " \${other_args:-}"
+                        fi
+                    done
                 else
-                    \${self_make} \${project:-} \$make_target \${args:-}
+                    if [ "\${quiet:-}" == true ]; then
+                        \${self_make} "\$first_arg" "\${other_args:-}" 2>&1 >/dev/null
+                    else
+                        \${self_make} "\$first_arg" "\${other_args:-}"
+                    fi
                 fi
             )
         else
