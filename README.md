@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/faiyaz7283/dcutil.svg?branch=master)](https://travis-ci.org/faiyaz7283/dcutil)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1686/badge)](https://bestpractices.coreinfrastructure.org/projects/1686)
 
-The  dcutil  is an utility program written in conjunction with Bash and Make. The main objective of dcutil is to setup 
-an organic workflow for project operations running on Docker containers. The name dcutil is short for docker compose 
+The  dcutil  is an utility program written in conjunction with shell script and Make. The main objective of dcutil is to 
+setup an organic workflow for project operations running on Docker containers. The name dcutil is short for docker compose 
 utility. Docker compose is a great tool to automate and build services, and dcutil simply adds on to that by providing
 more helper tools to achieve a full dev operation. 
 
