@@ -7,11 +7,12 @@ before_install:
   - mkdir -p $dcutil_program_installation_dir
   - export PATH=$PATH:$dcutil_program_installation_dir
   - dcutil_dir="$(dirname $(pwd))"
-  - cp -R "${dcutil_dir}/dcutil/dcutil-libs-example" "${dcutil_dir}/dcutil-libs"
   - dcutil_libs="${dcutil_dir}/dcutil-libs"
+  - mkdir -p ${dcutil_libs}/{docker-compose,makefiles}
+  - touch ${dcutil_libs}/.env
   - mv ${dcutil_dir}/dcutil ${dcutil_program_installation_dir}/.dcutil
   - cd ${dcutil_program_installation_dir}/.dcutil
-  - ./install.sh $dcutil_program_installation_dir $dcutil_libs
+  - ./install.sh $dcutil_program_installation_dir ${dcutil_libs}
   - source ~/.bashrc && source ~/.bash_profile
 
 script:

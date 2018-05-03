@@ -34,25 +34,6 @@ show_projects projects : isset_env
 		done; \
 	fi
 
-rm_vars : check_not_root isset_p isset_env
-	@$(call print_running_target); \
-	$(call to_upper, p, $(p)); \
-	if grep -Fq "$${p}" .env; then \
-		$(call print_color, 3, "Are you sure? All $(p) related variables from the .env file will be removed ?"); \
-		select choice in "Yes" "No"; do \
-			case $$choice in \
-				Yes ) $(call remove_matching_line, $${p}_, .env); \
-					  $(call print_target_success, "All $(p) related variables have been removed from .env file."); \
-					  break;; \
-				No )  exit;; \
-				* ) echo "Please enter 1 for Yes or 2 for No.";; \
-			esac; \
-		done; \
-	else \
-		$(call print_color, 1, "Sorry$(,) there's no $(p) related variables found on .env file."); \
-	fi; \
-	$(call print_completed_target)
-
 #---------------------------------------------------------------------------------------[ Validation targets ]----------
 check_not_root :
 ifeq ($(shell id -u),0)
