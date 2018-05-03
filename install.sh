@@ -424,15 +424,20 @@ if [ "${exist:-}" == "true" ] && [[ $(ps -o args= $PPID) = *"${set_script}"* ]];
             currentVersion=$(git describe --tags)
             git fetch -qt --all --prune && git pull -q
             latestVersion=$(git describe --tags $(git rev-list --tags --max-count=1))
-            if [ "$currentVersion" != "${latestVersion:-}" ]; then
-                git checkout -q ${latestVersion}
-                cl 7 "Repo: "; cl 2 "up to date using the latest version ${latestVersion}.\n"
+            if [ "${currentVersion}" != "${latestVersion}" ]; then
+                cl 3 "Updating the repo...\n" 1
+                if git checkout -q ${latestVersion}; then
+                    cl 7 "Done."; cl 2 " √\n"
+                fi
+            elif [ "${currentVersion}" == "${latestVersion}" ]; then
+                cl 7 "Repo: "; cl 2 "Up to date.\n"
+            else
+                cl 7 "Script: "; cl 1 "Unable to update.\n"
             fi
         fi
     fi
 
     if [ "$(print_command_script)" != "$(cat ${set_script})" ]; then
-        cl 7 "Script: "; cl 1 "outdated.\n"
         print_command_script > "/tmp/${this_name}"
     else
         cl 7 "Script: "; cl 2 "up to date.\n"
