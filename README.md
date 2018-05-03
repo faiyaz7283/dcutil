@@ -2,14 +2,14 @@
 [![Build Status](https://travis-ci.org/faiyaz7283/dcutil.svg?branch=master)](https://travis-ci.org/faiyaz7283/dcutil)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1686/badge)](https://bestpractices.coreinfrastructure.org/projects/1686)
 
-A utility program for developers to run with docker-compose. The main objective of using DCUTIL - is to make 
-running of dev projects on docker containers a cinch. It simply helps automate helpful functions, which in otherwise 
-most would do manually. 
+The  dcutil  is an utility program written in conjunction with Bash and Make. The main objective of dcutil is to setup 
+an organic workflow for project operations running on Docker containers. The name dcutil is short for docker compose 
+utility. Docker compose is a great tool to automate and build services, and dcutil simply adds on to that by providing
+more helper tools to achieve a full dev operation. 
 
 - [Installing DCUTIL](#installing-dcutil)
     - [Requirements](#requirements)
-    - [Option 1 (RECOMMENDED): Execute the installer script remotely](#option-1-recommended-execute-the-installer-script-remotely)
-    - [Option 2 (not suggested): Clone the project and run the installer](#option-2-not-suggested-clone-the-project-and-run-the-installer)
+    - Execute the installer script remotely](#execute-the-installer-script-remotely)
 - [An example usage - basic lemp stack](#an-example-usage---basic-lemp-stack)
     - [Setup the DCUTIL libs dir](#setup-the-dcutil-libs-dir)
     - [Usage](#usage)
@@ -33,11 +33,8 @@ Please make sure your machine satisfies the list of requirements below.
 - Post installation dependencies:
     - [Docker](https://docs.docker.com/install) CE/EE
     - GNU Make >= 3
-    - awk
-    - sed 
-    - tput
 
-#### Option 1 (RECOMMENDED): Execute the installer script remotely ####
+#### Execute the installer script remotely ####
 
 Argument 1 is the directory path where the actual DCUTIL command will be installed. This generally should be a bin 
 folder, for example /usr/local/bin or ~/bin. Just make sure that bin directory is on your shell PATH. Argument 2 and 3 
@@ -68,13 +65,6 @@ Now you can issue the **dcutil** command from anywhere and run the program.
 ```bash
 dcutil
 ```  
-
-#### Option 2 (not suggested): Clone the project and run the installer ####
-
-Suggested location to clone is ~/bin or /usr/local/bin, however you are free to clone it wherever you like. Just keep
-in mind, when cloning in a bin directory, use .dcutil rather than dcutil for the repo root, to prevent collision with 
-the dcutil command. Argument 1, 2 and 3 is required when using this option. Please check option 1 for more details on 
-the arguments.
 
 ### An example usage - basic lemp stack ###
 

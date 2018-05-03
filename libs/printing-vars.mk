@@ -105,3 +105,11 @@ define print_command
 	commands="$${commands// /\\n - }"; \
 	$(call print_dual_color, 7, "\n$${name} commands: \n", 2, " - $${commands}")
 endef
+
+# Get the pmf target label for printing
+define get_pmf_target_label
+	$(call get_custom_project_makefile); \
+    makefilename="$$(basename $${pmf})"; \
+	$(call trim, target, $(1)); \
+    pmf_target_label="$${makefilename} » $$target"
+endef

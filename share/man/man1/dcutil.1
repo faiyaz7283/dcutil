@@ -1,11 +1,10 @@
 .TH DCUTIL 1 "11 APRIL 2018" "" "General Commands Manual"
 .SH NAME
 .B dcutil
-\-- A docker-compose utility for developers
+\-- A utility tool for developers to help with their local developments.
 .SH SYNOPSIS
 .B dcutil
-[options] [parameters]
-.I <target>...
+[options] [commands/targets] [arguments]
 .SH DESCRIPTION
 The
 .B dcutil
@@ -17,20 +16,39 @@ is short for docker compose utility. Docker-compose is a great tool to automate 
 .B dcutil
 adds some utility tasks to make running projects with docker-compose a little bit easier.
 .SH OPTIONS
-An option
-.B MUST
-be set as the first argument. The option
-.B -q --quiet
-can be preceded by parameters and target. All other options are just stand alone and cannot be combined.
+Options are set as the first argument. One of the most important option is the name of the project or projects. This is
+most likely the only option used for most part. Almost all available commands require this option.
+.TP
+.B "[ p=project / project / 5 / 1:2:3 ]"
+This is a unique flag. This can be called many ways. The most verbose way to use this option would be to use the
+.B p=project
+style. You can also omit the p= and simply type the name of the project. You can also use the index value of the project.
+To find the index value, simply issue the command `dcutil projects` and it will print all the available projects along
+with its key. Use a single key to call one project, or multiple keys to call multiple projects. To use multiple keys,
+you must use
+.B :
+as a delimiter. For example
+.B 1:2:5
+would call projects asscociated with keys 1, 2 and 5 respectively.
+.TP
+.B "-q --quiet"
+Use the -q flag to reduce verbosity. Keep in mind, -q does not necessarily silent everything, however it reduces the
+verbosity level to a minimum.
 .TP
 .B "-u --update"
-Check and run update for
+Check and update
 .B dcutil.
 .TP
 .B "-r --remove"
 Uninstall
 .B dcutil
-from the machine.
+from your machine.
+.TP
+.B "-h  --help"
+Use the -h flag to call the manual page.
+.TP
+.B "--man"
+See -h. You can also use man dcutil to invoke the manual page directly.
 .TP
 .B --ip
 Print the machine's private IP.
@@ -48,39 +66,37 @@ This option can be used to get the value for
 .B dcutil_script_dir, dcutil_script, dcutil_libs
 and
 .B dcutil_root.
-(mostly for internal use)
-.SH PARAMETERS
-Parameters are basically variables passed onto the
-.B dcutil
-Makefile. They can be set before or after the target. There is one required parameter to run the dcutil program
-.B -p.
-The
-.B -p
-parameter tells
-.B dcutil
-which project to run the targets on. There's also 2 more ways to set the project, by using the
-project key number or simply writing the project name. However, these shortcuts can only be used if provided as the
-first argument, otherwise it will not work as intended.
-.SH TARGETS
-Any defined make targets from the default
-.B dcutil
-Makefile, or user defined custom makefile(s). Only one target per command can be used. To find all the available
-.B dcutil
-targets take a look at the Makefile in your dcutil folder. There is also a helper target called
-.B targets
-to retrieve all the available targets. It generally will display only the targets listed on the dcutil/Makefile, however
-you can also list project specific targets if you run the target with a project parameter. Keep in mind, for the project
-specific targets to be available, the custom makefile must be setup with a
-.B list_ts
-target which prints all targets delimited by space.
+(designed for internal use.)
 .TP
-Get all available native targets:
-.B dcutil targets
+.B "--set-libs"
+Use the --set-libs flag to change the location of the dcutil's libs folder.
+.SH COMMANDS
+Commands are set of actions defined with make targets. You can run all docker-compose commands with
+.B dcutil.
+Simply prepend the command with dc_ and pass any arguments as you normally would. Please look at the usage section for
+examples. You can also set your own commands via the projects custom makefile. To run custom commands, you will need to
+prepend it with double underscores.
+.SH EXAMPLES
 .TP
-Get all available native targets plus project <prjct1> targets:
-.B dcutil p=prjct1 targets
-.SH USAGES
-usage details go here
+Get a lit of all the commands:
+.B dcutil commands
+.TP
+Get a list of all the commands including project specific user defined commands:
+.B dcutil 5 commands
+.TP
+Show all projects with their indexes:
+.B dcutil projects
+.TP
+Use the special build command to build multiple projects:
+.B dcutil 5:6:10 build
+.TP
+Run docker-compose down on all available projects:
+.B dcutil --all dc_down
+.TP
+Run a command inside a docker-compose service container:
+.B dcutil 1 dc_cmd cnt=node cnt_shell=bash
+.TP
+Please refer to the github page @ https://github.com/faiyaz7283/dcutil#dcutil for more details and examples.
 .SH BUGS
 Please report all bugs at https://github.com/faiyaz7283/dcutil/issues.
 .SH AUTHOR
