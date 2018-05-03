@@ -73,12 +73,12 @@ files, makefiles, configurations etc.
 #### Setting up the libs dir ####
 
 Create a new directory, name it anything you like. Then inside that directory create a .env file and create 2 new folders
-called docker-compose and makefiles. Once you finish, let dcutil know of this new created directory using --set-libs flag.
+called docker-compose and makefiles. Once you finish, let dcutil know of this newly created directory using --set-libs flag.
 
 ```bash
-mkdir ~/dcutil-libs
-cd ~/dcutil-libs && touch .env && mkdir docker-compose makefiles
-dcutil --set-libs ~/dcutil-libs
+dcutil_libs=/path/for/dcutil-libs
+mkdir -p ${dcutil_libs}/{docker-compose,makefiles} && touch ${dcutil_libs}/.env
+dcutil --set-libs ${dcutil_libs}
 ```
 
 #### Fill in the .env file ####
