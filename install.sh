@@ -129,8 +129,8 @@ self_update() {
 generic_info() {
     cl 7 "Usage: " 1;
     cl 7 "${this_name} ["; cl 3 "options" 1; cl 7 "] "
-    cl 7 "["; cl 3 "parameters" 1; cl 7 "] "
-    cl 7 "<"; cl 3 "target" 1; cl 7 ">\n"
+    cl 7 "["; cl 3 "commands" 1; cl 7 "] "
+    cl 7 "["; cl 3 "arguments" 1; cl 7 "]\n"
     cl 7 "\n"
     cl 7 "Please visit "; cl 4 "${remote_repo_url%.git} " 1; cl 7 "for more info and usage details.\n"
     cl 7 "Copyright (c) "; cl 6 "\$(date +%Y) " 1; cl 7 "Faiyaz Haider under the "; cl 6 "MIT " 1; cl 7 "License.\n"

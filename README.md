@@ -83,10 +83,9 @@ dcutil --set-libs ${dcutil_libs}
 
 #### Fill in the .env file ####
 
-This is the file, where we set all environment values to be used in our docker-compose files. dcutil also uses this file
-to learn about the projects, projects working directory, and project external docker-compose service dependencies. Let 
-see some example of setting up the .env file. We will assume, we have currently two code projects called apple and orange, 
-and 3 shared services called database, cache and proxy. Shared services are any docker-compose service that
+This is the file, where we set all environment values to be used in our docker-compose files. This file is also used by 
+dcutil to work. Let see some example of setting up the .env file. We will assume, we have currently two code projects called 
+apple and orange, and 3 shared services called database, cache and proxy. Shared services are any docker-compose service that
 can be connected externally with other docker-compose setup.
 
 Let's add these 5 projects using the PROJECTS variable. When adding multiple items, you have to use a semicolon as separator.

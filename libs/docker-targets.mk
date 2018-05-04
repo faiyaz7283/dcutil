@@ -1,33 +1,18 @@
 #-----------------------------------------------------------------------------------[ Docker-Compose targets ]----------
-# For dc_login, dc_cmd and dc_workstation use the parameters below:
-# args = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
+# For dc_login and dc_cmd use the parameters below:
 # cnt = The service container name.
 # cnt_user = The user to enter the container.
 # cnt_shell = The container shell.
+# cmd = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
 #-----------------------------------------------------------------------------------------------------------------------
 dc_start= $(call print_running_target); $(call extract_dcfs_for_docker_compose)
 
 dc_% :
 	@dc_cmd=$@; \
 	dc_cmd=$${dc_cmd#dc_}; \
-	$(call override); \
 	$(dc_start); \
 	$(dc_compose) $${dc_cmd} $${args}; \
 	$(call print_completed_target)
-
-# Start docker containers from docker compose file.
-dc_start :
-	@$(call dc_start); \
-	$(dc_compose) start $${args}; \
-	$(call print_completed_target)
-
-
-# Stop all docker-compose related running containers.
-dc_stop :
-	@$(call dc_start); \
-	$(dc_compose) stop $${args}; \
-	$(call print_completed_target)
-
 
 # Check projects docker containers statuses
 dc_ps :
@@ -41,8 +26,7 @@ dc_ps :
 
 # Bring up the external dependencies
 dc_up_dependencies :
-	@$(call override); \
-	$(call print_running_target); \
+	@$(call print_running_target); \
 	$(call to_upper, project_dependencies_var, $(p)_SERVICE_DEPENDENCIES); \
 	dependencies=($$(echo $${!project_dependencies_var//:/ })); \
 	for i in "$${dependencies[@]}"; do \
@@ -100,10 +84,4 @@ dc_cmd :
 	$(call print_container_enter, $(cmd), $(cnt), $(cnt_shell), $(cnt_user)); \
 	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell) -l -c "$(cmd)"; \
 	$(call print_container_exit); \
-	$(call print_completed_target)
-
-# Check proejcts docker images
-dc_images :
-	@$(call dc_start); \
-	$(dc_compose) images $${args}; \
 	$(call print_completed_target)
