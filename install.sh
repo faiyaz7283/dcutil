@@ -184,7 +184,7 @@ get_host_ip() {
 
 get_version() {
     cd \$dcutil_root
-    version=\$(git describe --always --tags)
+    version=\$(git describe --tags \$(git rev-list --tags --max-count=1))
     sha1=\$(git rev-parse HEAD)
     release_date=\$(git log -1 --format=%ai \$version)
     cl 3 " DCUTIL\n" 1
