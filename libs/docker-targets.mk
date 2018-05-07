@@ -5,18 +5,18 @@
 # cnt_shell = The container shell.
 # cmd = Pass the command, or a group of commands (grouped commands must be enclosed in quotes).
 #-----------------------------------------------------------------------------------------------------------------------
-dc_start= $(call print_running_target); $(call extract_dcfs_for_docker_compose)
+dc_intro= $(call print_running_target); $(call extract_dcfs_for_docker_compose)
 
 dc_% :
 	@dc_cmd=$@; \
 	dc_cmd=$${dc_cmd#dc_}; \
-	$(dc_start); \
+	$(dc_intro); \
 	$(dc_compose) $${dc_cmd} $${args}; \
 	$(call print_completed_target)
 
 # Check projects docker containers statuses
 dc_ps :
-	 @$(call dc_start); \
+	 @$(call dc_intro); \
 	 if [ "$${args}" ]; then \
 		$(dc_compose) ps $${args}; \
 	 else \
@@ -45,7 +45,7 @@ dc_up_dependencies :
 
 # Bring up docker containers and prints out detailed info bout current cnts status and comeplete execution time
 dc_up : dc_up_dependencies
-	@$(call dc_start); \
+	@$(call dc_intro); \
 	if [ "$${args}" ]; then \
 		$(dc_compose) up $${args}; \
 	else \
@@ -56,18 +56,23 @@ dc_up : dc_up_dependencies
 
 # Bring down docker containers.
 dc_down :
-	@$(call dc_start); \
+	@$(call dc_intro); \
 	[ -z "$${args}" ] && args="--remove-orphans"; \
 	$(dc_compose) down $${args}; \
 	$(call print_completed_target)
 
-
+# Stops and starts containers
+dc_restart :
+	@$(call dc_intro); \
+	$(dc_compose) stop $${args}; \
+	$(dc_compose) start $${args}; \
+	$(call print_completed_target)
 # Enter a docker continer with the following parameters
 # cnt (REQUIRED) - Refers to the cnts service name given in the project's docker-compose yml file.
 # cnt_shell (NOT-REQUIRED) - Defaults to sh. Can also be set in .env file using {PROJECT}_WORKSTATION_SHELL variable.
 # cnt_user (NOT-REQUIRED) - Defaults to root. Can also be set in .env file using {PROJECT}_WORKSTATION_USER variable.
 dc_login :
-	@$(call dc_start); \
+	@$(call dc_intro); \
 	$(call print_container_enter, login, $(cnt), $(cnt_shell), $(cnt_user)); \
 	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell); \
 	$(call print_container_exit); \
@@ -80,7 +85,7 @@ dc_login :
 # cnt_shell (NOT-REQUIRED) - Defaults to sh. Can also be set in .env file using {PROJECT}_WORKSTATION_SHELL variable.
 # cnt_user (NOT-REQUIRED) - Defaults to root. Can also be set in .env file using {PROJECT}_WORKSTATION_USER variable.
 dc_cmd :
-	@$(call dc_start); \
+	@$(call dc_intro); \
 	$(call print_container_enter, $(cmd), $(cnt), $(cnt_shell), $(cnt_user)); \
 	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell) -l -c "$(cmd)"; \
 	$(call print_container_exit); \
