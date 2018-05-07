@@ -5,7 +5,7 @@
 The  dcutil  is an utility program written in conjunction with shell script and Make. The main objective of dcutil is to 
 setup an organic workflow for project operations running on Docker containers. The name dcutil is short for docker compose 
 utility. Docker compose is a great tool to automate and build services, and dcutil simply adds on to that by providing
-more helper tools to achieve a full dev operation. 
+more helper tools to achieve a complete dev operation cycle. 
 
 - [Installing dcutil](#installing-dcutil)
     - [Requirements](#requirements)
