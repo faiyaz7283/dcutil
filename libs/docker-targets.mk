@@ -74,7 +74,7 @@ dc_restart :
 dc_login :
 	@$(call dc_intro); \
 	$(call print_container_enter, login, $(cnt), $(cnt_shell), $(cnt_user)); \
-	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell); \
+	$(dc_compose) exec -e COLUMNS="`tput cols`" -e LINES="`tput lines`" --user=$(cnt_user) $(cnt) $(cnt_shell); \
 	$(call print_container_exit); \
 	$(call print_completed_target)
 
@@ -87,6 +87,6 @@ dc_login :
 dc_cmd :
 	@$(call dc_intro); \
 	$(call print_container_enter, $(cmd), $(cnt), $(cnt_shell), $(cnt_user)); \
-	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell) -l -c "$(cmd)"; \
+	$(dc_compose) exec -e COLUMNS="`tput cols`" -e LINES="`tput lines`" --user=$(cnt_user) $(cnt) $(cnt_shell) -l -c "$(cmd)"; \
 	$(call print_container_exit); \
 	$(call print_completed_target)
