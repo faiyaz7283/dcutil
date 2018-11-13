@@ -300,11 +300,11 @@ if [ -d "\$${this_name}_root" ]; then
 
                         (( "\$total_break" >= "\$i" )) && cl 8 "\n----------------[ " 1; cl 6 "Project: " 1; cl 6 "\${title}" 1;cl 8 " ]----------------\n" 1
 
-                        call="\${self_make} \${project} \${first_arg} \${other_args:-}"
+                        call="\${self_make} --no-print-directory \${project} \${first_arg} \${other_args:-}"
                         [ "\${quiet:-}" == "true" ] && \${call} 2>&1 >/dev/null || \${call}
                     done
                 else
-                    call="\${self_make} \${first_arg} \${other_args:-}"
+                    call="\${self_make} --no-print-directory \${first_arg} \${other_args:-}"
                     [ "\${quiet:-}" == "true" ] && \${call} 2>&1 >/dev/null || \${call}
                 fi
             )

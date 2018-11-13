@@ -64,9 +64,9 @@ dc_down :
 # Stops and starts containers
 dc_restart :
 	@$(call dc_intro); \
-	$(dc_compose) stop $${args}; \
-	$(dc_compose) start $${args}; \
+	$(dc_compose) restart $${args}; \
 	$(call print_completed_target)
+
 # Enter a docker continer with the following parameters
 # cnt (REQUIRED) - Refers to the cnts service name given in the project's docker-compose yml file.
 # cnt_shell (NOT-REQUIRED) - Defaults to sh. Can also be set in .env file using {PROJECT}_WORKSTATION_SHELL variable.
@@ -74,7 +74,7 @@ dc_restart :
 dc_login :
 	@$(call dc_intro); \
 	$(call print_container_enter, login, $(cnt), $(cnt_shell), $(cnt_user)); \
-	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell); \
+	$(dc_compose) exec -e COLUMNS="`tput cols`" -e LINES="`tput lines`" --user=$(cnt_user) $(cnt) $(cnt_shell); \
 	$(call print_container_exit); \
 	$(call print_completed_target)
 
@@ -87,6 +87,6 @@ dc_login :
 dc_cmd :
 	@$(call dc_intro); \
 	$(call print_container_enter, $(cmd), $(cnt), $(cnt_shell), $(cnt_user)); \
-	$(dc_compose) exec --user=$(cnt_user) $(cnt) $(cnt_shell) -l -c "$(cmd)"; \
+	$(dc_compose) exec -e COLUMNS="`tput cols`" -e LINES="`tput lines`" --user=$(cnt_user) $(cnt) $(cnt_shell) -l -c "$(cmd)"; \
 	$(call print_container_exit); \
 	$(call print_completed_target)
