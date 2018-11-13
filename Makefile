@@ -87,29 +87,36 @@ isset_valid_cf : check_not_root isset_valid_p isset_env
 	fi
 
 #--------------------------------------------------------------------------------------------[ Build targets ]----------
-build : check_not_root isset_valid_p isset_env isset_valid_cf
+build rebuild : check_not_root isset_valid_p isset_env isset_valid_cf
 	@$(call print_running_target); \
 	$(call get_code_projects); \
 	$(call get_custom_project_makefile) && dirname=$$(dirname $${pmf}); \
+	[ "$@" == "rebuild" ] && rebuild=true || rebuild=false; \
 	if [ -f "$${pmf}" ] && grep -Eqr ".*before_tasks.*:.*" $${pmf}; then \
-		$(MAKE) -f $${pmf} -I $${dirname} before_tasks; \
+		if ! $(MAKE) -f $${pmf} -I $${dirname} before_tasks rebuild=$${rebuild}; then \
+			exit 1; \
+		fi; \
 	fi; \
 	for code_project in $${code_projects[@]}; do \
 		$(call check_code_project_exist, "$${code_project}"); \
 		if [ "$$exist" == "true" ]; then \
-			$(MAKE) -f $${pmf} -I $$dirname "$${code_project}_tasks"; \
+			if ! $(MAKE) -f $${pmf} -I $$dirname "$${code_project}_tasks" rebuild=$${rebuild}; then \
+				exit 1; \
+			fi; \
 		else \
 			$(call print_target_error, "Code project '$${code_project}' does not exist."); \
 		fi; \
 	done; \
 	if [ -f "$${pmf}" ] && grep -Eqr ".*after_tasks.*:.*" $${pmf}; then \
-		$(MAKE) -f $${pmf} -I $${dirname} after_tasks; \
+		if ! $(MAKE) -f $${pmf} -I $${dirname} after_tasks rebuild=$${rebuild}; then \
+			exit 1; \
+		fi; \
 	fi; \
 	$(call print_completed_target)
 
 #-----------------------------------------------------------------------------------[ Custom project targets ]----------
-# Custom project targets points to the cutom project makefile. Users can call any custom targets prepending target name
-# with double underscores.
+# Custom project targets points to the custom project makefile. Users can call any custom targets by prepending target 
+# name with double underscores.
 #-----------------------------------------------------------------------------------------------------------------------
 __% : check_not_root isset_valid_p isset_env
 	@target=$@; \

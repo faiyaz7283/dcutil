@@ -1,7 +1,8 @@
 #-----------------------------------------------------------------------------------------[ Helper functions ]----------
 # Export .env variables
 define export_env
-	[ -f ".env" ] && export $$(cat .env | grep -v ^\# | xargs)
+	$(call sanitize_dir, file, $(1)); \
+	[ -f "$${file}" ] && export $$(grep -v '^[0-9]\|^#' $${file} | xargs)
 endef
 
 # Convert string to upper
@@ -52,7 +53,7 @@ define replace_or_update
 	$(call trim, var_name, $(1)); \
 	var_name=$${var_name%'%'}; \
 	var_name=$${var_name#'%'}; \
-    $(call find_replace, $(1), $(2), $(3), $${4:-#}); \
+        $(call find_replace, $(1), $(2), $(3), $${4:-#}); \
 	if [ "$${!var_name}" ] && [ -f "$${file}.backup" ]; then \
 		$(call remove_matching_line, $$var_name, $${file}.backup); \
 	fi
@@ -222,7 +223,8 @@ endef
 # Check if the given code project exist
 define is_code_project_exist
 	$(call get_dcutil_project_working_dir); \
-	$(call trim, code_project_dir, $(1)); \
+	$(call trim, cp, $(1)); \
+	$(call sanitize_dir, code_project_dir, "$${wd}/$${cp}"); \
 	if [ -d "$$code_project_dir" ]; then \
 		if [ ! "$$(ls -A $$code_project_dir)" ]; then \
 			empty="true"; \
@@ -231,5 +233,20 @@ define is_code_project_exist
 		exist="true"; \
 	else \
 		exist="false"; \
+	fi
+endef
+
+# Get the current git branch name for the code project
+define get_code_project_branch_name
+	$(call get_dcutil_project_working_dir); \
+	$(call trim, cp, $(1)); \
+	$(call sanitize_dir, dir, "$${wd}/$${cp}"); \
+	if [ -d "$${dir}" ]; then \
+		current_dir=$$(pwd); \
+		cd "$${dir}"; \
+		if git rev-parse --git-dir 2>/dev/null 1>&2; then \
+			branch_name=$$(git rev-parse --symbolic-full-name --abbrev-ref HEAD); \
+		fi; \
+		cd $${current_dir}; \
 	fi
 endef
