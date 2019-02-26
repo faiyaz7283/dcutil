@@ -67,6 +67,12 @@ dc_restart :
 	$(dc_compose) restart $${args}; \
 	$(call print_completed_target)
 
+# Down and up the containers - creating a refresh effect
+dc_refresh :
+	@$(call dc_intro); \
+	$(dc_compose) down && $(self_make) dc_up $${args}; \
+	$(call print_completed_target)
+
 # Enter a docker continer with the following parameters
 # cnt (REQUIRED) - Refers to the cnts service name given in the project's docker-compose yml file.
 # cnt_shell (NOT-REQUIRED) - Defaults to sh. Can also be set in .env file using {PROJECT}_WORKSTATION_SHELL variable.
