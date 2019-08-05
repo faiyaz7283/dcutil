@@ -2,6 +2,9 @@ sudo: true
 
 language: bash
 
+env:
+  CODECOV_TOKEN="d2c2565c-d5a0-4b62-b1e0-dfcb734fe9f8"
+
 before_install:
   - dcutil_program_installation_dir=/tmp/local/bin
   - mkdir -p $dcutil_program_installation_dir
