@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 this_name="dcutil"
@@ -92,7 +92,7 @@ if_cmd_success() {
 # The command script
 print_command_script() {
     cat << EOS
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 export ${this_name}_script_dir="${script_dir}"
